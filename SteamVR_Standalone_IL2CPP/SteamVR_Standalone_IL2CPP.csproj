@@ -1,0 +1,463 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{CD430B64-0EA8-4084-912C-379979B05B7C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SteamVR_Standalone_IL2CPP</RootNamespace>
+    <AssemblyName>SteamVR_Standalone_IL2CPP</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Build\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;UNITY_2017_1_OR_NEWER,UNITY_2017_2_OR_NEWER,UNITY_5_3_OR_NEWER</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Build\Release\</OutputPath>
+    <DefineConstants>TRACE;UNITY_2017_1_OR_NEWER,UNITY_2017_2_OR_NEWER,UNITY_5_3_OR_NEWER</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Actions\ActionSetClasses\SteamVR_Input_ActionSet_default.cs" />
+    <Compile Include="Actions\SteamVR_Input_Actions.cs" />
+    <Compile Include="Actions\SteamVR_Input_ActionSets.cs" />
+    <Compile Include="Actions\SteamVR_Input_Initialization.cs" />
+    <Compile Include="Input\BehaviourUnityEvents\SteamVR_Behaviour_BooleanEvent.cs" />
+    <Compile Include="Input\BehaviourUnityEvents\SteamVR_Behaviour_PoseEvent.cs" />
+    <Compile Include="Input\BehaviourUnityEvents\SteamVR_Behaviour_Pose_ConnectedChangedEvent.cs" />
+    <Compile Include="Input\BehaviourUnityEvents\SteamVR_Behaviour_Pose_DeviceIndexChangedEvent.cs" />
+    <Compile Include="Input\BehaviourUnityEvents\SteamVR_Behaviour_Pose_TrackingChangedEvent.cs" />
+    <Compile Include="Input\BehaviourUnityEvents\SteamVR_Behaviour_SingleEvent.cs" />
+    <Compile Include="Input\BehaviourUnityEvents\SteamVR_Behaviour_SkeletonEvent.cs" />
+    <Compile Include="Input\BehaviourUnityEvents\SteamVR_Behaviour_Skeleton_ConnectedChangedEvent.cs" />
+    <Compile Include="Input\BehaviourUnityEvents\SteamVR_Behaviour_Skeleton_TrackingChangedEvent.cs" />
+    <Compile Include="Input\BehaviourUnityEvents\SteamVR_Behaviour_Vector2Event.cs" />
+    <Compile Include="Input\BehaviourUnityEvents\SteamVR_Behaviour_Vector3Event.cs" />
+    <Compile Include="Input\SteamVR_Action.cs" />
+    <Compile Include="Input\SteamVR_ActionDirections.cs" />
+    <Compile Include="Input\SteamVR_ActionSet.cs" />
+    <Compile Include="Input\SteamVR_ActionSet_Manager.cs" />
+    <Compile Include="Input\SteamVR_Action_Boolean.cs" />
+    <Compile Include="Input\SteamVR_Action_In.cs" />
+    <Compile Include="Input\SteamVR_Action_Out.cs" />
+    <Compile Include="Input\SteamVR_Action_Pose.cs" />
+    <Compile Include="Input\SteamVR_Action_Single.cs" />
+    <Compile Include="Input\SteamVR_Action_Skeleton.cs" />
+    <Compile Include="Input\SteamVR_Action_Vector2.cs" />
+    <Compile Include="Input\SteamVR_Action_Vector3.cs" />
+    <Compile Include="Input\SteamVR_Action_Vibration.cs" />
+    <Compile Include="Input\SteamVR_ActivateActionSetOnLoad.cs" />
+    <Compile Include="Input\SteamVR_Behaviour_Boolean.cs" />
+    <Compile Include="Input\SteamVR_Behaviour_Pose.cs" />
+    <Compile Include="Input\SteamVR_Behaviour_Single.cs" />
+    <Compile Include="Input\SteamVR_Behaviour_Skeleton.cs" />
+    <Compile Include="Input\SteamVR_Behaviour_SkeletonCustom.cs" />
+    <Compile Include="Input\SteamVR_Behaviour_Vector2.cs" />
+    <Compile Include="Input\SteamVR_Behaviour_Vector3.cs" />
+    <Compile Include="Input\SteamVR_DefaultAction.cs" />
+    <Compile Include="Input\SteamVR_DefaultActionSet.cs" />
+    <Compile Include="Input\SteamVR_Input.cs" />
+    <Compile Include="Input\SteamVR_Input_ActionFile.cs" />
+    <Compile Include="Input\SteamVR_Input_ActionScopes.cs" />
+    <Compile Include="Input\SteamVR_Input_ActionSetUsages.cs" />
+    <Compile Include="Input\SteamVR_Input_BindingFile.cs" />
+    <Compile Include="Input\SteamVR_Input_Generator_Names.cs" />
+    <Compile Include="Input\SteamVR_Input_References.cs" />
+    <Compile Include="Input\SteamVR_Input_Source.cs" />
+    <Compile Include="Input\SteamVR_Input_Sources.cs" />
+    <Compile Include="Input\SteamVR_Skeleton_Pose.cs" />
+    <Compile Include="Input\SteamVR_Skeleton_Poser.cs" />
+    <Compile Include="Input\SteamVR_UpdateModes.cs" />
+    <Compile Include="Plugins\openvr_api.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scripts\SteamVR.cs" />
+    <Compile Include="Scripts\SteamVR_Behaviour.cs" />
+    <Compile Include="Scripts\SteamVR_Camera.cs" />
+    <Compile Include="Scripts\SteamVR_Ears.cs" />
+    <Compile Include="Scripts\SteamVR_EnumEqualityComparer.cs" />
+    <Compile Include="Scripts\SteamVR_Events.cs" />
+    <Compile Include="Scripts\SteamVR_ExternalCamera.cs" />
+    <Compile Include="Scripts\SteamVR_ExternalCamera_LegacyManager.cs" />
+    <Compile Include="Scripts\SteamVR_Fade.cs" />
+    <Compile Include="Scripts\SteamVR_Frustum.cs" />
+    <Compile Include="Scripts\SteamVR_IK.cs" />
+    <Compile Include="Scripts\SteamVR_LoadLevel.cs" />
+    <Compile Include="Scripts\SteamVR_Menu.cs" />
+    <Compile Include="Scripts\SteamVR_Overlay.cs" />
+    <Compile Include="Scripts\SteamVR_PlayArea.cs" />
+    <Compile Include="Scripts\SteamVR_Render.cs" />
+    <Compile Include="Scripts\SteamVR_RenderModel.cs" />
+    <Compile Include="Scripts\SteamVR_RingBuffer.cs" />
+    <Compile Include="Scripts\SteamVR_Settings.cs" />
+    <Compile Include="Scripts\SteamVR_Skybox.cs" />
+    <Compile Include="Scripts\SteamVR_SphericalProjection.cs" />
+    <Compile Include="Scripts\SteamVR_TrackedCamera.cs" />
+    <Compile Include="Scripts\SteamVR_TrackedObject.cs" />
+    <Compile Include="Scripts\SteamVR_TrackingReferenceManager.cs" />
+    <Compile Include="Scripts\SteamVR_Utils.cs" />
+    <Compile Include="Standalone\MelonCoroutineCallbacks.cs" />
+    <Compile Include="Util\Coroutines.cs" />
+    <Compile Include="Util\UnityHooks.cs" />
+    <Compile Include="Util\UnstrippedMathf.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\Libs\interop\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\Libs\interop\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Core">
+      <HintPath>..\Libs\core\BepInEx.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Unity.Common, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\core\BepInEx.Unity.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Unity.IL2CPP">
+      <HintPath>..\Libs\core\BepInEx.Unity.IL2CPP.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppI18N">
+      <HintPath>..\Libs\interop\Il2CppI18N.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppI18N.CJK">
+      <HintPath>..\Libs\interop\Il2CppI18N.CJK.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppInterop.Common, Version=1.4.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\core\Il2CppInterop.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppInterop.Generator, Version=1.4.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\core\Il2CppInterop.Generator.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppInterop.HarmonySupport, Version=1.4.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\core\Il2CppInterop.HarmonySupport.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppInterop.Runtime, Version=1.4.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\core\Il2CppInterop.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppMono.Security">
+      <HintPath>..\Libs\interop\Il2CppMono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>..\Libs\interop\Il2Cppmscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem">
+      <HintPath>..\Libs\interop\Il2CppSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Configuration">
+      <HintPath>..\Libs\interop\Il2CppSystem.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Core">
+      <HintPath>..\Libs\interop\Il2CppSystem.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Data">
+      <HintPath>..\Libs\interop\Il2CppSystem.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Diagnostics.StackTrace">
+      <HintPath>..\Libs\interop\Il2CppSystem.Diagnostics.StackTrace.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Globalization.Extensions">
+      <HintPath>..\Libs\interop\Il2CppSystem.Globalization.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.IO.Compression">
+      <HintPath>..\Libs\interop\Il2CppSystem.IO.Compression.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Numerics">
+      <HintPath>..\Libs\interop\Il2CppSystem.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Runtime.Serialization">
+      <HintPath>..\Libs\interop\Il2CppSystem.Runtime.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Text.Encoding.CodePages">
+      <HintPath>..\Libs\interop\Il2CppSystem.Text.Encoding.CodePages.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Xml">
+      <HintPath>..\Libs\interop\Il2CppSystem.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="MagicaCloth">
+      <HintPath>..\Libs\interop\MagicaCloth.dll</HintPath>
+    </Reference>
+    <Reference Include="NaughtyAttributes.Core">
+      <HintPath>..\Libs\interop\NaughtyAttributes.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="UIEffect">
+      <HintPath>..\Libs\interop\UIEffect.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.AI.Navigation">
+      <HintPath>..\Libs\interop\Unity.AI.Navigation.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst">
+      <HintPath>..\Libs\interop\Unity.Burst.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst.Unsafe">
+      <HintPath>..\Libs\interop\Unity.Burst.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Collections">
+      <HintPath>..\Libs\interop\Unity.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Mathematics">
+      <HintPath>..\Libs\interop\Unity.Mathematics.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Postprocessing.Runtime, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\interop\Unity.Postprocessing.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Timeline">
+      <HintPath>..\Libs\interop\Unity.Timeline.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\Libs\interop\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AccessibilityModule">
+      <HintPath>..\Libs\interop\UnityEngine.AccessibilityModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AIModule">
+      <HintPath>..\Libs\interop\UnityEngine.AIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AndroidJNIModule">
+      <HintPath>..\Libs\interop\UnityEngine.AndroidJNIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>..\Libs\interop\UnityEngine.AnimationModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ARModule">
+      <HintPath>..\Libs\interop\UnityEngine.ARModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>..\Libs\interop\UnityEngine.AssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>..\Libs\interop\UnityEngine.AudioModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.BaselibModule">
+      <HintPath>..\Libs\interop\UnityEngine.BaselibModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ClothModule">
+      <HintPath>..\Libs\interop\UnityEngine.ClothModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ClusterInputModule">
+      <HintPath>..\Libs\interop\UnityEngine.ClusterInputModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ClusterRendererModule">
+      <HintPath>..\Libs\interop\UnityEngine.ClusterRendererModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\Libs\interop\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CrashReportingModule">
+      <HintPath>..\Libs\interop\UnityEngine.CrashReportingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.DirectorModule">
+      <HintPath>..\Libs\interop\UnityEngine.DirectorModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.DSPGraphModule">
+      <HintPath>..\Libs\interop\UnityEngine.DSPGraphModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.FileSystemHttpModule">
+      <HintPath>..\Libs\interop\UnityEngine.FileSystemHttpModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.GameCenterModule">
+      <HintPath>..\Libs\interop\UnityEngine.GameCenterModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.GIModule">
+      <HintPath>..\Libs\interop\UnityEngine.GIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.GridModule">
+      <HintPath>..\Libs\interop\UnityEngine.GridModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.HotReloadModule">
+      <HintPath>..\Libs\interop\UnityEngine.HotReloadModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>..\Libs\interop\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\Libs\interop\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>..\Libs\interop\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputModule">
+      <HintPath>..\Libs\interop\UnityEngine.InputModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>..\Libs\interop\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.LocalizationModule">
+      <HintPath>..\Libs\interop\UnityEngine.LocalizationModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Networking">
+      <HintPath>..\Libs\interop\UnityEngine.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+      <HintPath>..\Libs\interop\UnityEngine.ParticleSystemModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PerformanceReportingModule">
+      <HintPath>..\Libs\interop\UnityEngine.PerformanceReportingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Physics2DModule">
+      <HintPath>..\Libs\interop\UnityEngine.Physics2DModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\Libs\interop\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ProfilerModule">
+      <HintPath>..\Libs\interop\UnityEngine.ProfilerModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule">
+      <HintPath>..\Libs\interop\UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ScreenCaptureModule">
+      <HintPath>..\Libs\interop\UnityEngine.ScreenCaptureModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SharedInternalsModule">
+      <HintPath>..\Libs\interop\UnityEngine.SharedInternalsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SpriteMaskModule">
+      <HintPath>..\Libs\interop\UnityEngine.SpriteMaskModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SpriteShapeModule">
+      <HintPath>..\Libs\interop\UnityEngine.SpriteShapeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.StreamingModule">
+      <HintPath>..\Libs\interop\UnityEngine.StreamingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.StyleSheetsModule">
+      <HintPath>..\Libs\interop\UnityEngine.StyleSheetsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SubstanceModule">
+      <HintPath>..\Libs\interop\UnityEngine.SubstanceModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SubsystemsModule">
+      <HintPath>..\Libs\interop\UnityEngine.SubsystemsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainModule">
+      <HintPath>..\Libs\interop\UnityEngine.TerrainModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainPhysicsModule">
+      <HintPath>..\Libs\interop\UnityEngine.TerrainPhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreFontEngineModule">
+      <HintPath>..\Libs\interop\UnityEngine.TextCoreFontEngineModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreModule">
+      <HintPath>..\Libs\interop\UnityEngine.TextCoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreTextEngineModule">
+      <HintPath>..\Libs\interop\UnityEngine.TextCoreTextEngineModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\Libs\interop\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TilemapModule">
+      <HintPath>..\Libs\interop\UnityEngine.TilemapModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Timeline">
+      <HintPath>..\Libs\interop\UnityEngine.Timeline.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TimelineModule">
+      <HintPath>..\Libs\interop\UnityEngine.TimelineModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TLSModule">
+      <HintPath>..\Libs\interop\UnityEngine.TLSModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\Libs\interop\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule">
+      <HintPath>..\Libs\interop\UnityEngine.UIElementsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsNativeModule">
+      <HintPath>..\Libs\interop\UnityEngine.UIElementsNativeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\Libs\interop\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UmbraModule">
+      <HintPath>..\Libs\interop\UnityEngine.UmbraModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UNETModule">
+      <HintPath>..\Libs\interop\UnityEngine.UNETModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityAnalyticsCommonModule">
+      <HintPath>..\Libs\interop\UnityEngine.UnityAnalyticsCommonModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityAnalyticsModule">
+      <HintPath>..\Libs\interop\UnityEngine.UnityAnalyticsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityConnectModule">
+      <HintPath>..\Libs\interop\UnityEngine.UnityConnectModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityCurlModule">
+      <HintPath>..\Libs\interop\UnityEngine.UnityCurlModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityTestProtocolModule">
+      <HintPath>..\Libs\interop\UnityEngine.UnityTestProtocolModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAssetBundleModule">
+      <HintPath>..\Libs\interop\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule">
+      <HintPath>..\Libs\interop\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <HintPath>..\Libs\interop\UnityEngine.UnityWebRequestModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestTextureModule">
+      <HintPath>..\Libs\interop\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestWWWModule">
+      <HintPath>..\Libs\interop\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VehiclesModule">
+      <HintPath>..\Libs\interop\UnityEngine.VehiclesModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VFXModule">
+      <HintPath>..\Libs\interop\UnityEngine.VFXModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VideoModule">
+      <HintPath>..\Libs\interop\UnityEngine.VideoModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VirtualTexturingModule">
+      <HintPath>..\Libs\interop\UnityEngine.VirtualTexturingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VRModule">
+      <HintPath>..\Libs\interop\UnityEngine.VRModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.WindModule">
+      <HintPath>..\Libs\interop\UnityEngine.WindModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.XRModule">
+      <HintPath>..\Libs\interop\UnityEngine.XRModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(TargetDir)\SteamVR_Standalone_IL2CPP.dll" "..\..\..\Libs\Steam_VR\" /Y /I</PostBuildEvent>
+  </PropertyGroup>
+</Project>
