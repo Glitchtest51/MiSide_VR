@@ -96,8 +96,7 @@ namespace MiSide_VR.Player
                 Origin.position = FPSCam.transform.position;
                 //FPSCam.transform.rotation = StereoRender.Head.rotation;
 
-                // This crashes the game but does display stuff in the headset
-                //// Check if VRPlayer.Instance is not null and ensure the proper conditions are met
+                // Check if VRPlayer.Instance is not null and ensure the proper conditions are met
                 if (VRPlayer.Instance != null && VRPlayer.Instance.StereoRender != null && VRPlayer.Instance.StereoRender.stereoRenderPass != null) {
                     // Execute the stereoRenderPass
                     VRPlayer.Instance.StereoRender.stereoRenderPass.Execute();
