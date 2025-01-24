@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.XR;
 using Valve.VR;
 using static MiSide_VR.Plugin;
+using static UnityEngine.UI.Image;
 
 namespace MiSide_VR.Player
 {

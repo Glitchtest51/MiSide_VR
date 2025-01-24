@@ -36,7 +36,7 @@ namespace MiSide_VR.Player
 
             Plugin.onSceneLoaded += OnSceneLoaded;
 
-            SteamVR_Actions.PreInitialize();
+            //SteamVR_Actions.PreInitialize();
             SteamVR.InitializeStandalone(EVRApplicationType.VRApplication_Scene);
 
             SetupImmediately();
@@ -65,9 +65,9 @@ namespace MiSide_VR.Player
             if (FPSCam != null)
             {
                 StereoRender = Body.gameObject.AddComponent<StereoRender>();
-                Origin.position = FPSCam.transform.position;
-                Origin.rotation = FPSCam.transform.rotation;
-                Origin.SetParent(FPSCam.transform);
+                Origin.SetParent(FPSCam.transform, false);
+                Origin.localPosition = Vector3.zero;
+                Origin.localRotation = Quaternion.identity;
             }
             setupLock = false;
         }
@@ -83,9 +83,28 @@ namespace MiSide_VR.Player
             if (FPSCam != null)
             {
                 StereoRender = Body.gameObject.AddComponent<StereoRender>();
-                Origin.position = FPSCam.transform.position;
-                Origin.rotation = Quaternion.identity;
-                Origin.SetParent(FPSCam.transform);
+                Origin.SetParent(FPSCam.transform, false);
+                Origin.localPosition = Vector3.zero;
+                Origin.localRotation = Quaternion.identity;
+
+                // make cubes on cameras for debugging purposes, ill delete it when i fix the cam
+                //GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                //cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                //cube.transform.position = Camera.main.transform.position;
+                //cube.transform.SetParent(Camera.main.transform);
+                //Renderer renderer = cube.GetComponent<Renderer>();
+                //if (renderer != null) {
+                //    renderer.material.color = Color.red;
+                //}
+
+                //GameObject cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                //cube2.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                //cube2.transform.position = StereoRender.Head.gameObject.transform.position;
+                //cube2.transform.SetParent(StereoRender.Head.gameObject.transform);
+                //Renderer renderer2 = cube2.GetComponent<Renderer>();
+                //if (renderer2 != null) {
+                //    renderer2.material.color = Color.red;
+                //}
             }
         }
 
@@ -93,11 +112,15 @@ namespace MiSide_VR.Player
         {
             if (FPSCam != null && StereoRender != null && Origin != null)
             {
-                Origin.position = FPSCam.transform.position;
                 //FPSCam.transform.rotation = StereoRender.Head.rotation;
 
-                // This crashes the game but does display stuff in the headset
-                //// Check if VRPlayer.Instance is not null and ensure the proper conditions are met
+                if (Origin.localPosition.y == 0f) {
+                    Debug.Log("Origin.localPosition.y == 0f");
+                    Origin.localPosition = Origin.localPosition - Vector3.up * StereoRender.Head.localPosition.y;
+                }
+                Origin.position = new Vector3(FPSCam.transform.position.x, Origin.position.y, FPSCam.transform.position.z);
+
+                // Check if VRPlayer.Instance is not null and ensure the proper conditions are met
                 if (VRPlayer.Instance != null && VRPlayer.Instance.StereoRender != null && VRPlayer.Instance.StereoRender.stereoRenderPass != null) {
                     // Execute the stereoRenderPass
                     VRPlayer.Instance.StereoRender.stereoRenderPass.Execute();
@@ -110,38 +133,31 @@ namespace MiSide_VR.Player
             Plugin.onSceneLoaded -= OnSceneLoaded;
         }
 
-        //private void SetOriginHome()
-        //{
-        //    SetOriginPosRotScl(new Vector3(0.2f, 1.68f, 0.7f), new Vector3(0, 0, 0), new Vector3(1, 1, 1));
+        //private void SetOriginHome() {
+        //    SetOriginPosRotScl(new Vector3(0f, -1.70f, 0f), new Vector3(0, 0, 0), new Vector3(1, 1, 1));
         //}
 
-        //public void SetOriginPosRotScl(Vector3 pos, Vector3 euler, Vector3 scale)
-        //{
+        //public void SetOriginPosRotScl(Vector3 pos, Vector3 euler, Vector3 scale) {
         //    Origin.position = pos;
         //    Origin.localEulerAngles = euler;
         //    Origin.localScale = scale;
         //}
 
-        //public void SetOriginScale(float scale)
-        //{
+        //public void SetOriginScale(float scale) {
         //    Origin.localScale = new Vector3(scale, scale, scale);
         //}
 
-        //public Vector3 GetWorldForward()
-        //{
+        //public Vector3 GetWorldForward() {
         //    return StereoRender.Head.forward;
         //}
 
-        //public Vector3 GetFlatForwardDirection(Vector3 foward)
-        //{
+        //public Vector3 GetFlatForwardDirection(Vector3 foward) {
         //    foward.y = 0;
         //    return foward.normalized;
         //}
 
-        //public float GetPlayerHeight()
-        //{
-        //    if (!StereoRender.Head)
-        //    {
+        //public float GetPlayerHeight() {
+        //    if (!StereoRender.Head) {
         //        return 1.8f;
         //    }
         //    return StereoRender.Head.localPosition.y;

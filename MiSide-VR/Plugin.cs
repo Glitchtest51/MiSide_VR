@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Security;
 using MiSide_VR.Player;
 using UnityEngine.SceneManagement;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace MiSide_VR;
 
@@ -72,9 +74,9 @@ public class Plugin : BasePlugin
         Instance = this;
 
         //if (SteamVRRunningCheck()) {
-        InitVR();
+            InitVR();
         //} else {
-        //    Log.LogWarning("VR launch aborted, VR is disabled or SteamVR is off!");
+        //    Log.Warning("VR launch aborted, VR is disabled or SteamVR is off!");
         //}
 
         Log.Info("Reached end of Load()");
@@ -96,9 +98,9 @@ public class Plugin : BasePlugin
     //    possibleVRProcesses.AddRange(Process.GetProcessesByName("vrserver"));
     //    possibleVRProcesses.AddRange(Process.GetProcessesByName("vrcompositor"));
 
-    //    Log.LogInfo("VR processes found - " + possibleVRProcesses.Count);
+    //    Log.Info("VR processes found - " + possibleVRProcesses.Count);
     //    foreach (Process p in possibleVRProcesses) {
-    //        Log.LogInfo(p.ToString());
+    //        Log.Info(p.ToString());
     //    }
     //    return possibleVRProcesses.Count > 0;
     //}

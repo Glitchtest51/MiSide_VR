@@ -43,6 +43,7 @@ namespace MiSide_VR.Player
             if (!VRPlayer.Instance) {
                 GameObject rig = new GameObject("[VRCameraRig]");
                 rig.transform.parent = transform;
+                rig.transform.localRotation = Quaternion.identity;
                 rig.AddComponent<VRPlayer>();
             }
         }
