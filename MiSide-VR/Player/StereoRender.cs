@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.XR;
 using Valve.VR;
 using static MiSide_VR.Plugin;
@@ -47,6 +47,8 @@ namespace MiSide_VR.Player
             Head.localRotation = Quaternion.identity;
             Head.gameObject.GetOrAddComponent<SteamVR_TrackedObject>().index = SteamVR_TrackedObject.EIndex.Hmd;
 
+            PostProcessLayer sourcePostProcessLayer = mainCamera.GetComponent<PostProcessLayer>();
+
             var leftEye = Head.Find("LeftEye");
             if (!leftEye)
                 leftEye = new GameObject("LeftEye").transform;
@@ -56,6 +58,9 @@ namespace MiSide_VR.Player
             leftEye.localEulerAngles = new Vector3(0, 0, 0);
 
             LeftCam = leftEye.gameObject.GetOrAddComponent<Camera>();
+            PostProcessLayer LeftPostProcessLayer = leftEye.gameObject.GetOrAddComponent<PostProcessLayer>();
+            LeftPostProcessLayer.m_Resources = sourcePostProcessLayer.m_Resources;
+            LeftPostProcessLayer.volumeLayer = sourcePostProcessLayer.volumeLayer;
             LeftCam.cullingMask = defaultCullingMask;
             LeftCam.stereoTargetEye = StereoTargetEyeMask.None;
             LeftCam.clearFlags = CameraClearFlags.SolidColor;
@@ -73,6 +78,9 @@ namespace MiSide_VR.Player
             rightEye.localEulerAngles = new Vector3(0, 0, 0);
 
             RightCam = rightEye.gameObject.GetOrAddComponent<Camera>();
+            PostProcessLayer RightPostProcessLayer = rightEye.gameObject.GetOrAddComponent<PostProcessLayer>();
+            RightPostProcessLayer.m_Resources = sourcePostProcessLayer.m_Resources;
+            RightPostProcessLayer.volumeLayer = sourcePostProcessLayer.volumeLayer;
             RightCam.cullingMask = defaultCullingMask;
             RightCam.stereoTargetEye = StereoTargetEyeMask.None;
             RightCam.clearFlags = CameraClearFlags.SolidColor;
@@ -83,6 +91,9 @@ namespace MiSide_VR.Player
             RightCam.backgroundColor = mainCamera.backgroundColor;
 
             HeadCam = Head.gameObject.GetOrAddComponent<Camera>();
+            PostProcessLayer HeadPostProcessLayer = Head.gameObject.GetOrAddComponent<PostProcessLayer>();
+            HeadPostProcessLayer.m_Resources = sourcePostProcessLayer.m_Resources;
+            HeadPostProcessLayer.volumeLayer = sourcePostProcessLayer.volumeLayer;
             HeadCam.cullingMask = 0;
             HeadCam.depth = 100;
             HeadCam.enabled = false;
@@ -151,44 +162,42 @@ namespace MiSide_VR.Player
             if (OpenVR.Compositor != null)
                 OpenVR.Compositor.WaitGetPoses(renderPoseArray, gamePoseArray);
         }
-
-        public class StereoRenderPass
-        {
-            private StereoRender stereoRender;
-            public bool isRendering;
-
-            public StereoRenderPass(StereoRender stereoRender)
-            {
-                this.stereoRender = stereoRender;
-            }
-
-            public void Execute()
-            {
-                if (!stereoRender.enabled)
-                    return;
-
-                var leftTex = new Texture_t
-                {
-                    handle = stereoRender.LeftRT.GetNativeTexturePtr(),
-                    eType = SteamVR.instance.textureType,
-                    eColorSpace = EColorSpace.Auto
-                };
-                var rightTex = new Texture_t
-                {
-                    handle = stereoRender.RightRT.GetNativeTexturePtr(),
-                    eType = SteamVR.instance.textureType,
-                    eColorSpace = EColorSpace.Auto
-                };
-                var textureBounds = new VRTextureBounds_t();
-                textureBounds.uMin = 0;
-                textureBounds.vMin = 1;
-                textureBounds.uMax = 1;
-                textureBounds.vMax = 0;
-                EVRCompositorError errorL = OpenVR.Compositor.Submit(EVREye.Eye_Left, ref leftTex, ref textureBounds, EVRSubmitFlags.Submit_Default);
-                EVRCompositorError errorR = OpenVR.Compositor.Submit(EVREye.Eye_Right, ref rightTex, ref textureBounds, EVRSubmitFlags.Submit_Default);
-            }
-        }
-
     }
 
+    public class StereoRenderPass
+    {
+        private StereoRender stereoRender;
+        public bool isRendering;
+
+        public StereoRenderPass(StereoRender stereoRender)
+        {
+            this.stereoRender = stereoRender;
+        }
+
+        public void Execute()
+        {
+            if (!stereoRender.enabled)
+                return;
+
+            var leftTex = new Texture_t
+            {
+                handle = stereoRender.LeftRT.GetNativeTexturePtr(),
+                eType = SteamVR.instance.textureType,
+                eColorSpace = EColorSpace.Auto
+            };
+            var rightTex = new Texture_t
+            {
+                handle = stereoRender.RightRT.GetNativeTexturePtr(),
+                eType = SteamVR.instance.textureType,
+                eColorSpace = EColorSpace.Auto
+            };
+            var textureBounds = new VRTextureBounds_t();
+            textureBounds.uMin = 0;
+            textureBounds.vMin = 1;
+            textureBounds.uMax = 1;
+            textureBounds.vMax = 0;
+            EVRCompositorError errorL = OpenVR.Compositor.Submit(EVREye.Eye_Left, ref leftTex, ref textureBounds, EVRSubmitFlags.Submit_Default);
+            EVRCompositorError errorR = OpenVR.Compositor.Submit(EVREye.Eye_Right, ref rightTex, ref textureBounds, EVRSubmitFlags.Submit_Default);
+        }
+    }
 }

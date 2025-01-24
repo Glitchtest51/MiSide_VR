@@ -115,7 +115,6 @@ namespace MiSide_VR.Player
                 //FPSCam.transform.rotation = StereoRender.Head.rotation;
 
                 if (Origin.localPosition.y == 0f) {
-                    Debug.Log("Origin.localPosition.y == 0f");
                     Origin.localPosition = Origin.localPosition - Vector3.up * StereoRender.Head.localPosition.y;
                 }
                 Origin.position = new Vector3(FPSCam.transform.position.x, Origin.position.y, FPSCam.transform.position.z);
