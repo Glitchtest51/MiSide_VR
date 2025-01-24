@@ -4,21 +4,11 @@ using BepInEx.Unity.IL2CPP;
 using Il2CppInterop.Runtime.Injection;
 using System.IO;
 using UnityEngine;
-using UnityEngine.XR.Management;
-using BepInEx.Unity.IL2CPP.Utils;
-using Il2CppSystem.Collections.Generic;
-using UnityEngine.XR;
-using Valve.VR;
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
 using MiSide_VR.Player;
-using BepInEx.Preloader.Core.Patching;
 using UnityEngine.SceneManagement;
-using Il2CppSystem.Diagnostics;
-using UnityEngine.XR.OpenXR;
-using HarmonyLib;
-using UnityEngine.Rendering;
 
 namespace MiSide_VR;
 
@@ -28,7 +18,7 @@ public class Plugin : BasePlugin
     public const string PLUGIN_GUID = "com.Glitchtest51.MiSideVR";
     public const string PLUGIN_NAME = "MiSide-VR";
     public const string AUTHOR = "Glitchtest51";
-    public const string PLUGIN_VERSION = "1.0.0.0";
+    public const string PLUGIN_VERSION = "1.0.0";
 
     public static Plugin Instance { get; private set; }
     internal static bool vrEnabled;
@@ -80,10 +70,6 @@ public class Plugin : BasePlugin
         Log.Info($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
 
         Instance = this;
-
-        //Log.Info("Attempting to initialize SteamVR...");
-        //SteamVR.Initialize(false);
-        //Log.Info("SteamVR initialized successfully.");
 
         //if (SteamVRRunningCheck()) {
         InitVR();

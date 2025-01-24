@@ -1,13 +1,8 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.XR;
 using Valve.VR;
 using static MiSide_VR.Plugin;
-using HarmonyLib;
-using Il2CppInterop;
 
 namespace MiSide_VR.Player
 {

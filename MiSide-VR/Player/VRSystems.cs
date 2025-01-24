@@ -2,8 +2,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static MiSide_VR.Plugin;
-using HarmonyLib;
-
 namespace MiSide_VR.Player
 {
 

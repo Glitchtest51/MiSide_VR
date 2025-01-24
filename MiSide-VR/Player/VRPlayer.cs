@@ -1,12 +1,9 @@
-﻿using MiSide_VR;
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Valve.VR;
 using static MiSide_VR.Plugin;
-using static UnityEngine.UI.Image;
-//using MelonCoroutines = MelonLoader.MelonCoroutines;
 
 namespace MiSide_VR.Player
 {
