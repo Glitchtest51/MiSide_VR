@@ -1,7 +1,4 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: Build SLN
 
 on:
   push:
@@ -11,15 +8,18 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '3.1.x', '6.0.x' ]
 
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 4.7.2
+          dotnet-version: ${{ matrix.dotnet-version }}
+        
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
