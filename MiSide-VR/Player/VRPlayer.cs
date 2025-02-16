@@ -1,8 +1,11 @@
-﻿using System;
+﻿using MiSide_VR.Player.Controls;
+using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.LowLevel;
 using UnityEngine.SceneManagement;
 using Valve.VR;
+using static MiSide_VR.Player.Controls.HandController;
 using static MiSide_VR.Plugin;
 
 namespace MiSide_VR.Player
@@ -16,6 +19,8 @@ namespace MiSide_VR.Player
         public Transform Body { get; private set; }
         public Camera Camera { get; private set; }
         public Camera FPSCam { get; private set; }
+        public HandController LeftHand { get; private set; }
+        public HandController RightHand { get; private set; }
         public StereoRender StereoRender { get; private set; }
 
         public bool isUIMode = false;
@@ -30,17 +35,16 @@ namespace MiSide_VR.Player
             }
             Instance = this;
 
-            // 初始化VR相机和左右手
             Body = transform;
             Origin = transform.parent;
 
             Plugin.onSceneLoaded += OnSceneLoaded;
 
-            //SteamVR_Actions.PreInitialize();
+            SteamVR_Settings.instance.poseUpdateMode = SteamVR_UpdateModes.OnLateUpdate;
             SteamVR.InitializeStandalone(EVRApplicationType.VRApplication_Scene);
 
             SetupImmediately();
-            DontDestroyOnLoad(Origin);
+            //DontDestroyOnLoad(Origin);
         }
 
         private static bool setupLock = false;
@@ -65,10 +69,17 @@ namespace MiSide_VR.Player
             if (FPSCam != null)
             {
                 StereoRender = Body.gameObject.AddComponent<StereoRender>();
-                Origin.SetParent(FPSCam.transform, false);
+                //Origin.SetParent(FPSCam.transform, false);
                 Origin.localPosition = Vector3.zero;
-                Origin.localRotation = Quaternion.identity;
+                Origin.localRotation = FPSCam.transform.rotation;
+                Origin.localScale = new Vector3(1.5f, 1.5f, 1.5f);
             }
+
+            LeftHand = transform.Find("LeftHand").gameObject.AddComponent<HandController>();
+            RightHand = transform.Find("RightHand").gameObject.AddComponent<HandController>();
+            LeftHand.Setup(HandType.Left);
+            RightHand.Setup(HandType.Right);
+
             setupLock = false;
         }
         public void SetupImmediately()
@@ -83,45 +94,36 @@ namespace MiSide_VR.Player
             if (FPSCam != null)
             {
                 StereoRender = Body.gameObject.AddComponent<StereoRender>();
-                Origin.SetParent(FPSCam.transform, false);
+                //Origin.SetParent(FPSCam.transform, false);
                 Origin.localPosition = Vector3.zero;
-                Origin.localRotation = Quaternion.identity;
-
-                // make cubes on cameras for debugging purposes, ill delete it when i fix the cam
-                //GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                //cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-                //cube.transform.position = Camera.main.transform.position;
-                //cube.transform.SetParent(Camera.main.transform);
-                //Renderer renderer = cube.GetComponent<Renderer>();
-                //if (renderer != null) {
-                //    renderer.material.color = Color.red;
-                //}
-
-                //GameObject cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                //cube2.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-                //cube2.transform.position = StereoRender.Head.gameObject.transform.position;
-                //cube2.transform.SetParent(StereoRender.Head.gameObject.transform);
-                //Renderer renderer2 = cube2.GetComponent<Renderer>();
-                //if (renderer2 != null) {
-                //    renderer2.material.color = Color.red;
-                //}
+                Origin.localRotation = FPSCam.transform.rotation;
+                Origin.localScale = new Vector3(1.5f, 1.5f, 1.5f);
             }
+
+            LeftHand = transform.Find("LeftHand").gameObject.AddComponent<HandController>();
+            RightHand = transform.Find("RightHand").gameObject.AddComponent<HandController>();
+            LeftHand.Setup(HandType.Left);
+            RightHand.Setup(HandType.Right);
         }
 
         private void LateUpdate()
         {
-            if (FPSCam != null && StereoRender != null && Origin != null)
-            {
-                //FPSCam.transform.rotation = StereoRender.Head.rotation;
+            if (FPSCam != null && StereoRender != null && Origin != null) {
+                //if (GetPlayerHeight() < 1.75f) {
+                //    float tmp = 1.9f / GetPlayerHeight();
+                //    Origin.localScale = new Vector3(tmp, tmp, tmp);
+                //}
 
-                if (Origin.localPosition.y == 0f) {
-                    Origin.localPosition = Origin.localPosition - Vector3.up * StereoRender.Head.localPosition.y;
-                }
-                Origin.position = new Vector3(FPSCam.transform.position.x, Origin.position.y, FPSCam.transform.position.z);
+                Origin.position = new Vector3(FPSCam.transform.position.x, 0, FPSCam.transform.position.z);
+                FPSCam.transform.rotation = StereoRender.Head.rotation;
+
+                //if (Origin.localPosition.y == 0f || iscutscene) {
+                //    Origin.localPosition = Origin.localPosition - Vector3.up * StereoRender.Head.localPosition.y;
+                //}
+                //Origin.position = new Vector3(FPSCam.transform.position.x, Origin.position.y, FPSCam.transform.position.z);
 
                 // Check if VRPlayer.Instance is not null and ensure the proper conditions are met
                 if (VRPlayer.Instance != null && VRPlayer.Instance.StereoRender != null && VRPlayer.Instance.StereoRender.stereoRenderPass != null) {
-                    // Execute the stereoRenderPass
                     VRPlayer.Instance.StereoRender.stereoRenderPass.Execute();
                 }
             }
@@ -155,11 +157,11 @@ namespace MiSide_VR.Player
         //    return foward.normalized;
         //}
 
-        //public float GetPlayerHeight() {
-        //    if (!StereoRender.Head) {
-        //        return 1.8f;
-        //    }
-        //    return StereoRender.Head.localPosition.y;
-        //}
+        public float GetPlayerHeight() {
+            if (!StereoRender.Head) {
+                return 1.6f;
+            }
+            return StereoRender.Head.localPosition.y;
+        }
     }
 }

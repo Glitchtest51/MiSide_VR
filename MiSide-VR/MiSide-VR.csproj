@@ -17,6 +17,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Assets\AssetBundles\**" />
+    <EmbeddedResource Remove="Assets\AssetBundles\**" />
+    <None Remove="Assets\AssetBundles\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.*" IncludeAssets="compile" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
   </ItemGroup>
@@ -400,6 +406,6 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(TargetDir)\MiSide_VR.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\&quot; /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)\SteamVR_Standalone_IL2CPP.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\&quot; /Y /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(TargetDir)\Unity.XR.Management.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\RuntimeDeps\&quot; /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)\Unity.XR.OpenXR.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\RuntimeDeps\&quot; /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)\Unity.XR.OpenVR.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\RuntimeDeps\&quot; /Y /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;..\CopyToGame\Plugins\x86_64\*&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\Plugins\&quot; /Y /E /H /C /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;..\CopyToGame\*&quot; &quot;..\Build\MiSideFull_Data\&quot; /Y /E /H /C /I&#xD;&#xA;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Glitchtest51&quot; xcopy &quot;..\Build\*&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\MiSide\&quot; /Y /E /H /C /I" />
+    <Exec Command="xcopy &quot;$(TargetDir)\MiSide_VR.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\&quot; /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)\SteamVR_Standalone_IL2CPP.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\&quot; /Y /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(TargetDir)\Unity.XR.Management.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\RuntimeDeps\&quot; /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)\Unity.XR.OpenXR.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\RuntimeDeps\&quot; /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)\Unity.XR.OpenVR.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\RuntimeDeps\&quot; /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)\UniverseLib.IL2CPP.Unhollower.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\RuntimeDeps\&quot; /Y /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;.\Assets\AssetBundles\*&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\AssetBundles\&quot; /Y /E /H /C /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;..\CopyToGame\Plugins\x86_64\*&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\Plugins\&quot; /Y /E /H /C /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;..\CopyToGame\*&quot; &quot;..\Build\MiSideFull_Data\&quot; /Y /E /H /C /I&#xD;&#xA;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Glitchtest51&quot; xcopy &quot;..\Build\*&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\MiSide\&quot; /Y /E /H /C /I" />
   </Target>
 </Project>

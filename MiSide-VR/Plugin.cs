@@ -11,6 +11,8 @@ using MiSide_VR.Player;
 using UnityEngine.SceneManagement;
 using System.Diagnostics;
 using System.Collections.Generic;
+using MiSide_VR.Player.Controls;
+using MiSide_VR.Assets;
 
 namespace MiSide_VR;
 
@@ -23,28 +25,46 @@ public class Plugin : BasePlugin
     public const string PLUGIN_VERSION = "1.0.0";
 
     public static Plugin Instance { get; private set; }
-    internal static bool vrEnabled;
 
     public delegate void OnSceneLoadedEvent(Scene scene, LoadSceneMode mode);
     public static OnSceneLoadedEvent onSceneLoaded;
 
-    private void InitVR() {
-        Log.Info("Init Start");
+    public override void Load() {
+        Log.Setup(base.Log);
+        Log.Info($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
 
-        vrEnabled = true;
+        Instance = this;
+
+        //if (SteamVRRunningCheck()) {
+        InitVR();
+        //} else {
+        //    Log.Warning("VR launch aborted, VR is disabled or SteamVR is off!");
+        //}
+
+        Log.Info("Load() End");
+    }
+
+    private void InitVR() {
+        Log.Info("InitVR() Start");
+
         SetupIL2CPPClassInjections();
         LoadDll();
         SceneManager.sceneLoaded += new Action<Scene, LoadSceneMode>(OnSceneLoaded);
+        AssetLoader.LoadAssets();
 
-        Log.Info("Reached end of InitVRLoader");
+        Log.Info("InitVR() End");
     }
 
     public static void LoadDll() {
-        SetUnmanagedDllDirectory();
-        var result = LoadLibrary("openvr_api.dll");
-        Log.Info("Load openvr_api.dll result: " + result);
-        if (result == IntPtr.Zero) {
-            Log.Error("Win32 ErrorInfo: " + Marshal.GetLastWin32Error());
+        try {
+            SetUnmanagedDllDirectory();
+            var result = LoadLibrary("openvr_api.dll");
+            Log.Info("Load openvr_api.dll result: " + result);
+            if (result == IntPtr.Zero) {
+                throw new InvalidOperationException($"Failed to load library, Win32 Error: {Marshal.GetLastWin32Error()}");
+            }
+        } catch (Exception ex) {
+            Log.Error($"Error loading DLL: {ex.Message}");
         }
     }
 
@@ -52,6 +72,7 @@ public class Plugin : BasePlugin
         ClassInjector.RegisterTypeInIl2Cpp<VRSystems>();
         ClassInjector.RegisterTypeInIl2Cpp<VRPlayer>();
         ClassInjector.RegisterTypeInIl2Cpp<StereoRender>();
+        ClassInjector.RegisterTypeInIl2Cpp<HandController>();
     }
 
     public static void SetUnmanagedDllDirectory() {
@@ -67,26 +88,11 @@ public class Plugin : BasePlugin
     [DllImport("Kernel32.dll", EntryPoint = "LoadLibrary", CallingConvention = CallingConvention.Winapi)]
     public static extern IntPtr LoadLibrary(string lpFileName);
 
-    public override void Load() {
-        Log.Setup(base.Log);
-        Log.Info($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
-
-        Instance = this;
-
-        //if (SteamVRRunningCheck()) {
-            InitVR();
-        //} else {
-        //    Log.Warning("VR launch aborted, VR is disabled or SteamVR is off!");
-        //}
-
-        Log.Info("Reached end of Load()");
-    }
-
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode) // Runs when a Scene has Loaded and is passed the Scene's Build Index and Name.
     {
-        //Log.Message("OnSceneWasLoaded: " + buildindex.ToString() + " | " + sceneName);
+        Log.Message("Plugin OnSceneLoaded() Start");
         if (!VRSystems.Instance) {
-            new GameObject("VR_Globals").AddComponent<VRSystems>();
+            new GameObject("[VR_Globals]").AddComponent<VRSystems>();
         }
         if (onSceneLoaded != null)
             onSceneLoaded.Invoke(scene, mode);
