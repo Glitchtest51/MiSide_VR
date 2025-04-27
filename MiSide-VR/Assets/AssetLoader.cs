@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using BepInEx;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using MiSide_VR.Player;
 using MiSide_VR.Stripped;
 using UnityEngine;
 using static MiSide_VR.Plugin;
@@ -12,11 +13,12 @@ namespace MiSide_VR.Assets {
         private static Il2CppReferenceArray<Object> assets;
 
         public static GameObject VRCameraRig { get; private set; }
+        public static Shader LaserUnlit { get; private set; }
 
         public static void LoadAssets() {
             var assetbundle = LoadBundle("vrassets");
             VRCameraRig = LoadAsset<GameObject>("[VRCameraRig]");
-
+            LaserUnlit = LoadAsset<Shader>("PureDark/LaserUnlit");
         }
 
         public static T LoadAsset<T>(string name) where T : Object {

@@ -47,6 +47,7 @@ namespace MiSide_VR.Player
                 GameObject Origin = new GameObject("[Origin]");
                 GameObject rig = Instantiate(AssetLoader.VRCameraRig).gameObject;
                 rig.transform.parent = Origin.transform;
+                //rig.transform.parent = transform;
                 rig.transform.localPosition = new Vector3(0, 0, 0);
                 rig.transform.localRotation = Quaternion.identity;
                 rig.AddComponent<VRPlayer>();
@@ -64,19 +65,19 @@ namespace MiSide_VR.Player
             }
         }
 
-        private void TogglePlayerCam(bool toggle)
-        {
-            if (toggle)
-            {
-                VRPlayer.Instance.StereoRender.LeftCam.cullingMask = 0;
-                VRPlayer.Instance.StereoRender.RightCam.cullingMask = 0;
-            }
-            else
-            {
-                VRPlayer.Instance.StereoRender.LeftCam.cullingMask = StereoRender.defaultCullingMask;
-                VRPlayer.Instance.StereoRender.RightCam.cullingMask = StereoRender.defaultCullingMask;
-            }
-        }
+        //private void TogglePlayerCam(bool toggle)
+        //{
+        //    if (toggle)
+        //    {
+        //        VRPlayer.Instance.StereoRender.LeftCam.cullingMask = 0;
+        //        VRPlayer.Instance.StereoRender.RightCam.cullingMask = 0;
+        //    }
+        //    else
+        //    {
+        //        VRPlayer.Instance.StereoRender.LeftCam.cullingMask = StereoRender.defaultCullingMask;
+        //        VRPlayer.Instance.StereoRender.RightCam.cullingMask = StereoRender.defaultCullingMask;
+        //    }
+        //}
 
         private void OnDestroy()
         {

@@ -1,5 +1,6 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -147,16 +148,28 @@ namespace Valve.VR
         {
             CheckDeviceIndex();
 
-            //if (onConnectedChanged != null)
-            //    onConnectedChanged.Invoke(this, inputSource, connected);
+            if (onConnectedChanged != null)
+            {
+                var parameters = new Il2CppReferenceArray<Il2CppSystem.Object>(3);
+                parameters[0] = this;
+                parameters[1] = (int)inputSource;
+                parameters[2] = connected;
+                onConnectedChanged.Invoke(parameters);
+            }
             if (onConnectedChangedEvent != null)
                 onConnectedChangedEvent.Invoke(this, inputSource, connected);
         }
 
         protected virtual void OnTrackingChanged(SteamVR_Action_Pose changedAction, SteamVR_Input_Sources changedSource, ETrackingResult trackingChanged)
         {
-            //if (onTrackingChanged != null)
-            //    onTrackingChanged.Invoke(this, inputSource, trackingChanged);
+            if (onTrackingChanged != null)
+            {
+                var parameters = new Il2CppReferenceArray<Il2CppSystem.Object>(3);
+                parameters[0] = this;
+                parameters[1] = (int)inputSource;
+                parameters[2] = (int)trackingChanged;
+                onTrackingChanged.Invoke(parameters);
+            }
             if (onTrackingChangedEvent != null)
                 onTrackingChangedEvent.Invoke(this, inputSource, trackingChanged);
         }
@@ -182,8 +195,14 @@ namespace Valve.VR
                         //this.gameObject.BroadcastMessage("SetDeviceIndex", deviceIndex, SendMessageOptions.DontRequireReceiver);
                     }
 
-                    //if (onDeviceIndexChanged != null)
-                    //    onDeviceIndexChanged.Invoke(this, inputSource, deviceIndex);
+                    if (onDeviceIndexChanged != null)
+                    {
+                        var parameters = new Il2CppReferenceArray<Il2CppSystem.Object>(3);
+                        parameters[0] = this;
+                        parameters[1] = (int)inputSource;
+                        parameters[2] = deviceIndex;
+                        onDeviceIndexChanged.Invoke(parameters);
+                    }
                     if (onDeviceIndexChangedEvent != null)
                         onDeviceIndexChangedEvent.Invoke(this, inputSource, deviceIndex);
                 }

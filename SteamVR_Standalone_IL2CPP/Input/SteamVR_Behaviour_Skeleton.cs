@@ -1,5 +1,6 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -354,16 +355,28 @@ namespace Valve.VR
 
         private void OnDeviceConnectedChanged(SteamVR_Action_Skeleton fromAction, bool deviceConnected)
         {
-            //if (onConnectedChanged != null)
-            //    onConnectedChanged.Invoke(this, inputSource, deviceConnected);
+            if (onConnectedChanged != null)
+            {
+                var parameters = new Il2CppReferenceArray<Il2CppSystem.Object>(3);
+                parameters[0] = this;
+                parameters[1] = (int)inputSource;
+                parameters[2] = deviceConnected;
+                onConnectedChanged.Invoke(parameters);
+            }
             if (onConnectedChangedEvent != null)
                 onConnectedChangedEvent.Invoke(this, inputSource, deviceConnected);
         }
 
         private void OnTrackingChanged(SteamVR_Action_Skeleton fromAction, ETrackingResult trackingState)
         {
-            //if (onTrackingChanged != null)
-            //    onTrackingChanged.Invoke(this, inputSource, trackingState);
+            if (onTrackingChanged != null)
+            {
+                var parameters = new Il2CppReferenceArray<Il2CppSystem.Object>(3);
+                parameters[0] = this;
+                parameters[1] = (int)inputSource;
+                parameters[2] = (int)trackingState;
+                onTrackingChanged.Invoke(parameters);
+            }
             if (onTrackingChangedEvent != null)
                 onTrackingChangedEvent.Invoke(this, inputSource, trackingState);
         }

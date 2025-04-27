@@ -44,7 +44,9 @@ namespace MiSide_VR.Player
             SteamVR.InitializeStandalone(EVRApplicationType.VRApplication_Scene);
 
             SetupImmediately();
-            //DontDestroyOnLoad(Origin);
+
+            //test
+            DontDestroyOnLoad(Origin);
         }
 
         private static bool setupLock = false;
@@ -75,8 +77,8 @@ namespace MiSide_VR.Player
                 Origin.localScale = new Vector3(1.5f, 1.5f, 1.5f);
             }
 
-            LeftHand = transform.Find("LeftHand").gameObject.AddComponent<HandController>();
-            RightHand = transform.Find("RightHand").gameObject.AddComponent<HandController>();
+            LeftHand = transform.Find("LeftHand").gameObject.GetOrAddComponent<HandController>();
+            RightHand = transform.Find("RightHand").gameObject.GetOrAddComponent<HandController>();
             LeftHand.Setup(HandType.Left);
             RightHand.Setup(HandType.Right);
 
@@ -100,8 +102,8 @@ namespace MiSide_VR.Player
                 Origin.localScale = new Vector3(1.5f, 1.5f, 1.5f);
             }
 
-            LeftHand = transform.Find("LeftHand").gameObject.AddComponent<HandController>();
-            RightHand = transform.Find("RightHand").gameObject.AddComponent<HandController>();
+            LeftHand = transform.Find("LeftHand").gameObject.GetOrAddComponent<HandController>();
+            RightHand = transform.Find("RightHand").gameObject.GetOrAddComponent<HandController>();
             LeftHand.Setup(HandType.Left);
             RightHand.Setup(HandType.Right);
         }

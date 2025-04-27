@@ -4,13 +4,14 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Valve.VR;
+using MiSide_VR.Assets;
 
 namespace MiSide_VR.Player.Controls {
     public class HandController : MonoBehaviour {
         public HandController(IntPtr value) : base(value) { }
 
         public HandType handType;
-        //public Transform model;
+        public Transform model;
         public SteamVR_Behaviour_Pose pose;
         private LineRenderer ray;
         public Transform muzzle;
@@ -36,24 +37,32 @@ namespace MiSide_VR.Player.Controls {
 
         public void Setup(HandType handType) {
             this.handType = handType;
-            //this.model = transform.Find("Model");
+            this.model = transform.Find("Model");
             this.ray = transform.GetComponentInChildren<LineRenderer>();
             this.ray.sortingOrder = 999;
             this.savedLaserShader = this.ray.material.shader;
             this.muzzle = ray.transform;
+            if (muzzle == null) {
+                Debug.LogError("Muzzle is not assigned! Check if LineRenderer exists.");
+            }
             this.eventCamera = muzzle.GetComponent<Camera>();
 
             pose = transform.gameObject.GetOrAddComponent<SteamVR_Behaviour_Pose>();
-            //pose.poseAction = SteamVR_Actions.default_Pose;
+            if (pose == null) {
+                Debug.LogError("SteamVR_Behaviour_Pose is not assigned!");
+                return;
+            }
+
+            pose.poseAction = SteamVR_Actions.miSide_Pose;
             pose.inputSource = (handType == HandType.Left) ? SteamVR_Input_Sources.LeftHand : SteamVR_Input_Sources.RightHand;
             pose.origin = transform.parent;
 
-            //var shader = Resources.FindObjectsOfTypeAll<Shader>().First(x => x.name.Contains("M1/Character"));
-            //var renderers = model.GetComponentsInChildren<Renderer>();
-            //foreach (var renderer in renderers) {
+            // var shader = Resources.FindObjectsOfTypeAll<Shader>().First(x => x.name.Contains("M1/Character"));
+            // var renderers = model.GetComponentsInChildren<Renderer>();
+            // foreach (var renderer in renderers) {
             //    renderer.material.shader = shader;
             //    renderer.material.SetFloat("_OutlineWidth", 0.005f);
-            //}
+            // }
         }
 
         public void SetupEventSystem(EventSystem eventSystem, StandaloneInputModule inputModule) {
@@ -70,7 +79,7 @@ namespace MiSide_VR.Player.Controls {
                 ray.enabled = false;
             } else if (ray.gameObject.activeSelf) {
                 if (uiMode) {
-                    //ray.material.shader = VRAssets.LaserUnlit;
+                    ray.material.shader = AssetLoader.LaserUnlit;
                     ray.enabled = true;
                 } else {
                     ray.material.shader = savedLaserShader;

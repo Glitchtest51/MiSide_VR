@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 //======= Copyright (c) Valve Corporation, All rights reserved. ===============
@@ -116,7 +117,11 @@ namespace Valve.VR
         {
             if (onPressDown != null)
             {
-                //onPressDown.Invoke(this, fromSource, true);
+                var parameters = new Il2CppReferenceArray<Il2CppSystem.Object>(3);
+                parameters[0] = this;
+                parameters[1] = (int)fromSource;
+                parameters[2] = true;
+                onPressDown.Invoke(parameters);
             }
 
             if (onPressDownEvent != null)
@@ -129,7 +134,11 @@ namespace Valve.VR
         {
             if (onPress != null)
             {
-                //onPress.Invoke(this, fromSource, true);
+                var parameters = new Il2CppReferenceArray<Il2CppSystem.Object>(3);
+                parameters[0] = this;
+                parameters[1] = (int)fromSource;
+                parameters[2] = true;
+                onPress.Invoke(parameters);
             }
 
             if (onPressEvent != null)
@@ -142,7 +151,11 @@ namespace Valve.VR
         {
             if (onUpdate != null)
             {
-                //onUpdate.Invoke(this, fromSource, newState);
+                var parameters = new Il2CppReferenceArray<Il2CppSystem.Object>(3);
+                parameters[0] = this;
+                parameters[1] = (int)fromSource;
+                parameters[2] = newState;
+                onUpdate.Invoke(parameters);
             }
 
             if (onUpdateEvent != null)
@@ -155,7 +168,11 @@ namespace Valve.VR
         {
             if (onChange != null)
             {
-                //onChange.Invoke(this, fromSource, newState);
+                var parameters = new Il2CppReferenceArray<Il2CppSystem.Object>(3);
+                parameters[0] = this;
+                parameters[1] = (int)fromSource;
+                parameters[2] = newState;
+                onChange.Invoke(parameters);
             }
 
             if (onChangeEvent != null)
