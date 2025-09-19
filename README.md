@@ -1,4 +1,7 @@
 # MiSide_VR
+
+yes im still working on this
+
 WIP Mod to make MiSide playable in VR
 
 Currently renders and displays in the headset, no controller input yet, no menus, none of the 2d stuff, no body tracking, etc, just renders in vr, camera placement is also off currently.
