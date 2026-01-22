@@ -130,12 +130,6 @@
     <Reference Include="BepInEx.Unity.IL2CPP">
       <HintPath>..\Libs\core\BepInEx.Unity.IL2CPP.dll</HintPath>
     </Reference>
-    <Reference Include="Il2CppI18N">
-      <HintPath>..\Libs\interop\Il2CppI18N.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppI18N.CJK">
-      <HintPath>..\Libs\interop\Il2CppI18N.CJK.dll</HintPath>
-    </Reference>
     <Reference Include="Il2CppInterop.Common, Version=1.4.6.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\core\Il2CppInterop.Common.dll</HintPath>
@@ -166,27 +160,6 @@
     </Reference>
     <Reference Include="Il2CppSystem.Core">
       <HintPath>..\Libs\interop\Il2CppSystem.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppSystem.Data">
-      <HintPath>..\Libs\interop\Il2CppSystem.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppSystem.Diagnostics.StackTrace">
-      <HintPath>..\Libs\interop\Il2CppSystem.Diagnostics.StackTrace.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppSystem.Globalization.Extensions">
-      <HintPath>..\Libs\interop\Il2CppSystem.Globalization.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppSystem.IO.Compression">
-      <HintPath>..\Libs\interop\Il2CppSystem.IO.Compression.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppSystem.Numerics">
-      <HintPath>..\Libs\interop\Il2CppSystem.Numerics.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppSystem.Runtime.Serialization">
-      <HintPath>..\Libs\interop\Il2CppSystem.Runtime.Serialization.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppSystem.Text.Encoding.CodePages">
-      <HintPath>..\Libs\interop\Il2CppSystem.Text.Encoding.CodePages.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppSystem.Xml">
       <HintPath>..\Libs\interop\Il2CppSystem.Xml.dll</HintPath>
@@ -242,17 +215,11 @@
     <Reference Include="UnityEngine.AnimationModule">
       <HintPath>..\Libs\interop\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.ARModule">
-      <HintPath>..\Libs\interop\UnityEngine.ARModule.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>..\Libs\interop\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
       <HintPath>..\Libs\interop\UnityEngine.AudioModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.BaselibModule">
-      <HintPath>..\Libs\interop\UnityEngine.BaselibModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ClothModule">
       <HintPath>..\Libs\interop\UnityEngine.ClothModule.dll</HintPath>
@@ -274,9 +241,6 @@
     </Reference>
     <Reference Include="UnityEngine.DSPGraphModule">
       <HintPath>..\Libs\interop\UnityEngine.DSPGraphModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.FileSystemHttpModule">
-      <HintPath>..\Libs\interop\UnityEngine.FileSystemHttpModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.GameCenterModule">
       <HintPath>..\Libs\interop\UnityEngine.GameCenterModule.dll</HintPath>
@@ -307,9 +271,6 @@
     </Reference>
     <Reference Include="UnityEngine.LocalizationModule">
       <HintPath>..\Libs\interop\UnityEngine.LocalizationModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.Networking">
-      <HintPath>..\Libs\interop\UnityEngine.Networking.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
       <HintPath>..\Libs\interop\UnityEngine.ParticleSystemModule.dll</HintPath>
@@ -344,9 +305,6 @@
     <Reference Include="UnityEngine.StreamingModule">
       <HintPath>..\Libs\interop\UnityEngine.StreamingModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.StyleSheetsModule">
-      <HintPath>..\Libs\interop\UnityEngine.StyleSheetsModule.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine.SubstanceModule">
       <HintPath>..\Libs\interop\UnityEngine.SubstanceModule.dll</HintPath>
     </Reference>
@@ -362,9 +320,6 @@
     <Reference Include="UnityEngine.TextCoreFontEngineModule">
       <HintPath>..\Libs\interop\UnityEngine.TextCoreFontEngineModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.TextCoreModule">
-      <HintPath>..\Libs\interop\UnityEngine.TextCoreModule.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine.TextCoreTextEngineModule">
       <HintPath>..\Libs\interop\UnityEngine.TextCoreTextEngineModule.dll</HintPath>
     </Reference>
@@ -373,12 +328,6 @@
     </Reference>
     <Reference Include="UnityEngine.TilemapModule">
       <HintPath>..\Libs\interop\UnityEngine.TilemapModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.Timeline">
-      <HintPath>..\Libs\interop\UnityEngine.Timeline.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TimelineModule">
-      <HintPath>..\Libs\interop\UnityEngine.TimelineModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TLSModule">
       <HintPath>..\Libs\interop\UnityEngine.TLSModule.dll</HintPath>
