@@ -7,115 +7,105 @@ namespace MiSide_VR.VR;
 
 public class StereoRender : MonoBehaviour {
     public StereoRender(IntPtr value) : base(value) { }
-    
-    public static StereoRender Instance;
-    
-    public Transform Head;
-    
-    public Camera HeadCam;
-    
-    public Camera LeftCam, RightCam;
 
-    public Camera vrCam;
+    private static StereoRender _instance;
     
-    public RenderTexture LeftRT, RightRT;
+    public Transform head;
+    public Camera headCamera;
+
+    private const float Separation = 0.064f;
+    public Camera leftCamera, rightCamera;
+    public RenderTexture leftRT, rightRT;
     
-    public float separation = 0.064f;
+    private const float ClipStart = 0.1f;
+    private const float ClipEnd = 1000f;
+    public const int DefaultCullingMask = -1;
     
-    private float clipStart = 0.1f;
-    
-    private float clipEnd = 1000f;
-    
-    public static int defaultCullingMask = -1; // -1 = everything
-    
-    private int currentWidth, currentHeight;
+    private int _currentWidth, _currentHeight;
     
     public StereoRenderPass stereoRenderPass;
-
-    // Pose arrays for OpenVR: one for rendering, one for game logic (unused here but required by API)
-    private readonly TrackedDevicePose_t[] renderPoseArray = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
-    private readonly TrackedDevicePose_t[] gamePoseArray = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
+    
+    private readonly TrackedDevicePose_t[] _renderPoseArray = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
+    private readonly TrackedDevicePose_t[] _gamePoseArray = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
     
     public void Awake() {
-        if (Instance != null) {
+        Log.LogInfo("[StereoRender] StereoRender Created.");
+        
+        if (_instance) {
+            Log.LogWarning("[StereoRender] Duplicate StereoRender detected, destroying duplicate.");
             Destroy(gameObject);
             return;
         }
-        Instance = this;
+        _instance = this;
         
         Setup();
     }
     
     public void Setup() {
-        Log.LogInfo($"[StereoRender] ### SETTING UP STEREO RENDERING PIPELINE ###");
+        Log.LogInfo("[StereoRender] Initializing StereoRender...");
+        int mirrorLayer = LayerMask.NameToLayer("ForMirror");
 
         // Create or find the HMD transform
-        Head = transform.Find("Head");
-        if (!Head) 
-            Head = new GameObject("Head").transform;
-        Head.SetParent(transform, false);
-        Head.localPosition = Vector3.zero;
-        Head.localRotation = Quaternion.identity;
+        head = transform.Find("Head");
+        if (!head) 
+            head = new GameObject("Head").transform;
+        head.SetParent(transform, false);
+        head.localPosition = Vector3.zero;
+        head.localRotation = Quaternion.identity;
 
         // Mark this object as tracked by SteamVR (HMD)
-        Head.gameObject.GetOrAddComponent<SteamVR_TrackedObject>().index = SteamVR_TrackedObject.EIndex.Hmd;
-
-        // --- VR Camera ---
-        var vrCamera = Head.Find("vrCamera");
-        if (!vrCamera)
-            vrCamera = new GameObject("vrCamera").transform;
+        head.gameObject.GetOrAddComponent<SteamVR_TrackedObject>().index = SteamVR_TrackedObject.EIndex.Hmd;
         
-        vrCamera.SetParent(Head, false);
-        vrCamera.localPosition = new Vector3(-separation * 0.5f, 0, 0); // Offset left
-        vrCamera.localRotation = Quaternion.identity;
-
-        vrCam = vrCamera.gameObject.GetOrAddComponent<Camera>();
-        vrCam.cullingMask = defaultCullingMask;
-        vrCam.stereoTargetEye = StereoTargetEyeMask.None; // We handle stereo manually
-        vrCam.clearFlags = CameraClearFlags.Skybox;
-        vrCam.nearClipPlane = clipStart;
-        vrCam.farClipPlane = clipEnd;
-        vrCam.fieldOfView = 109.363f; // Matches typical headset FoV
-        vrCam.depth = 0;
-        vrCam.enabled = true;
+        // --- Head Camera ---
+        headCamera = head.gameObject.GetOrAddComponent<Camera>();
+        headCamera.enabled = false;
+        headCamera.cullingMask = DefaultCullingMask;
+        headCamera.clearFlags = CameraClearFlags.Skybox;
+        headCamera.nearClipPlane = ClipStart;
+        headCamera.farClipPlane = ClipEnd;
+        headCamera.fieldOfView = 109.363f; 
+        headCamera.depth = 0;
+        headCamera.cullingMask &= ~(1 << mirrorLayer);
         
         // --- LEFT EYE ---
-        var leftEye = Head.Find("LeftEye");
+        var leftEye = head.Find("LeftEye");
         if (!leftEye)
             leftEye = new GameObject("LeftEye").transform;
         
-        leftEye.SetParent(Head, false);
-        leftEye.localPosition = new Vector3(-separation * 0.5f, 0, 0); // Offset left
+        leftEye.SetParent(head, false);
+        leftEye.localPosition = new Vector3(-Separation * 0.5f, 0, 0);
         leftEye.localRotation = Quaternion.identity;
 
-        LeftCam = leftEye.gameObject.GetOrAddComponent<Camera>();
-        LeftCam.cullingMask = defaultCullingMask;
-        LeftCam.stereoTargetEye = StereoTargetEyeMask.None; // We handle stereo manually
-        LeftCam.clearFlags = CameraClearFlags.Skybox;
-        LeftCam.nearClipPlane = clipStart;
-        LeftCam.farClipPlane = clipEnd;
-        LeftCam.fieldOfView = 109.363f; // Matches typical headset FoV
-        LeftCam.depth = 0;
-        LeftCam.enabled = true;
+        leftCamera = leftEye.gameObject.GetOrAddComponent<Camera>();
+        leftCamera.cullingMask = DefaultCullingMask;
+        leftCamera.stereoTargetEye = StereoTargetEyeMask.None;
+        leftCamera.clearFlags = CameraClearFlags.Skybox;
+        leftCamera.nearClipPlane = ClipStart;
+        leftCamera.farClipPlane = ClipEnd;
+        leftCamera.fieldOfView = 109.363f;
+        leftCamera.depth = 0;
+        leftCamera.enabled = true;
+        leftCamera.cullingMask &= ~(1 << mirrorLayer);
 
         // --- RIGHT EYE ---
-        var rightEye = Head.Find("RightEye");
+        var rightEye = head.Find("RightEye");
         if (!rightEye)
             rightEye = new GameObject("RightEye").transform;
         
-        rightEye.SetParent(Head, false);
-        rightEye.localPosition = new Vector3(separation * 0.5f, 0, 0); // Offset right
+        rightEye.SetParent(head, false);
+        rightEye.localPosition = new Vector3(Separation * 0.5f, 0, 0); // Offset right
         rightEye.localRotation = Quaternion.identity;
 
-        RightCam = rightEye.gameObject.GetOrAddComponent<Camera>();
-        RightCam.cullingMask = defaultCullingMask;
-        RightCam.stereoTargetEye = StereoTargetEyeMask.None;
-        RightCam.clearFlags = CameraClearFlags.Skybox;
-        RightCam.nearClipPlane = clipStart;
-        RightCam.farClipPlane = clipEnd;
-        RightCam.fieldOfView = 109.363f;
-        RightCam.depth = 0;
-        RightCam.enabled = true;
+        rightCamera = rightEye.gameObject.GetOrAddComponent<Camera>();
+        rightCamera.cullingMask = DefaultCullingMask;
+        rightCamera.stereoTargetEye = StereoTargetEyeMask.None;
+        rightCamera.clearFlags = CameraClearFlags.Skybox;
+        rightCamera.nearClipPlane = ClipStart;
+        rightCamera.farClipPlane = ClipEnd;
+        rightCamera.fieldOfView = 109.363f;
+        rightCamera.depth = 0;
+        rightCamera.enabled = true;
+        rightCamera.cullingMask &= ~(1 << mirrorLayer);
 
         // Apply projection matrices from SteamVR (non-linear, per-eye)
         UpdateProjectionMatrix();
@@ -125,88 +115,75 @@ public class StereoRender : MonoBehaviour {
 
         // Initialize the OpenVR submission pass
         stereoRenderPass = new StereoRenderPass(this);
-    }
-    
-    public void SetCameraMask(int mask) {
-        LeftCam.cullingMask = mask;
-        RightCam.cullingMask = mask;
+        
+        Log.LogInfo("[StereoRender] StereoRender Initialized.");
     }
     
     public void UpdateProjectionMatrix() {
-        var leftProj = OpenVR.System.GetProjectionMatrix(EVREye.Eye_Left, clipStart, clipEnd);
-        var rightProj = OpenVR.System.GetProjectionMatrix(EVREye.Eye_Right, clipStart, clipEnd);
+        var leftProj = OpenVR.System.GetProjectionMatrix(EVREye.Eye_Left, ClipStart, ClipEnd);
+        var rightProj = OpenVR.System.GetProjectionMatrix(EVREye.Eye_Right, ClipStart, ClipEnd);
 
-        LeftCam.projectionMatrix = leftProj.ConvertToMatrix4x4();
-        RightCam.projectionMatrix = rightProj.ConvertToMatrix4x4();
+        leftCamera.projectionMatrix = leftProj.ConvertToMatrix4X4();
+        rightCamera.projectionMatrix = rightProj.ConvertToMatrix4X4();
     }
     
     public void UpdateResolution() {
         // Use SteamVR's recommended eye texture size, with fallbacks
-        currentWidth = (SteamVR.instance.sceneWidth > 0) ? (int)SteamVR.instance.sceneWidth : 2208;
-        currentHeight = (SteamVR.instance.sceneHeight > 0) ? (int)SteamVR.instance.sceneHeight : 2452;
+        _currentWidth = (SteamVR.instance.sceneWidth > 0) ? (int)SteamVR.instance.sceneWidth : 2208;
+        _currentHeight = (SteamVR.instance.sceneHeight > 0) ? (int)SteamVR.instance.sceneHeight : 2452;
 
         // Clean up old textures
-        if (LeftRT != null) Destroy(LeftRT);
-        if (RightRT != null) Destroy(RightRT);
+        if (leftRT) Destroy(leftRT);
+        if (rightRT) Destroy(rightRT);
 
         // Create new render textures
-        LeftRT = new RenderTexture(currentWidth, currentHeight, 24, RenderTextureFormat.ARGB32) { antiAliasing = 2 };
-        RightRT = new RenderTexture(currentWidth, currentHeight, 24, RenderTextureFormat.ARGB32) { antiAliasing = 2 };
+        leftRT = new RenderTexture(_currentWidth, _currentHeight, 24, RenderTextureFormat.ARGB32) { antiAliasing = 2 };
+        rightRT = new RenderTexture(_currentWidth, _currentHeight, 24, RenderTextureFormat.ARGB32) { antiAliasing = 2 };
 
         // Assign as render targets
-        LeftCam.targetTexture = LeftRT;
-        RightCam.targetTexture = RightRT;
-    }
-    
-    public void OnDestroy() {
-        Instance = null;
+        leftCamera.targetTexture = leftRT;
+        rightCamera.targetTexture = rightRT;
     }
     
     public void FixedUpdate() {
         // Allow a small tolerance (-1 pixel) to avoid unnecessary updates
-        if (currentWidth < (int)SteamVR.instance.sceneWidth - 1 || currentHeight < (int)SteamVR.instance.sceneHeight - 1) 
+        if (_currentWidth < (int)SteamVR.instance.sceneWidth - 1 || _currentHeight < (int)SteamVR.instance.sceneHeight - 1) 
             UpdateResolution();
     }
     
     public void LateUpdate() {
         // Fetch latest device poses from OpenVR compositor
-        OpenVR.Compositor.WaitGetPoses(renderPoseArray, gamePoseArray);
+        OpenVR.Compositor.WaitGetPoses(_renderPoseArray, _gamePoseArray);
 
         // Apply HMD rotation to the Head transform
-        var hmdPose = renderPoseArray[(int)OpenVR.k_unTrackedDeviceIndex_Hmd];
+        var hmdPose = _renderPoseArray[(int)OpenVR.k_unTrackedDeviceIndex_Hmd];
         if (hmdPose.bPoseIsValid)
-            Head.localRotation = hmdPose.mDeviceToAbsoluteTracking.GetRotation();
-        
+            head.localRotation = hmdPose.mDeviceToAbsoluteTracking.GetRotation();
 
         // Refresh projection matrices (they can change with IPD or calibration)
         UpdateProjectionMatrix();
     }
+    
+    public void OnDestroy() {
+        if (_instance == this)
+            _instance = null;
+    }
+    
+    public class StereoRenderPass(StereoRender stereoRender) {
 
-    /// <summary>
-    /// Custom render pass that submits left and right eye textures to the OpenVR compositor.
-    /// This is the final step that makes the rendered frames visible in the VR headset.
-    /// </summary>
-    public class StereoRenderPass {
-        private readonly StereoRender stereoRender;
-        public bool isRendering;
-
-        public StereoRenderPass(StereoRender stereoRender) {
-            this.stereoRender = stereoRender;
-        }
-        
         public void Execute() {
             if (!stereoRender.enabled)
                 return;
 
             // Wrap Unity render texture handles into OpenVR-compatible Texture_t structs
             var leftTex = new Texture_t {
-                handle = stereoRender.LeftRT.GetNativeTexturePtr(),
+                handle = stereoRender.leftRT.GetNativeTexturePtr(),
                 eType = SteamVR.instance.textureType,
                 eColorSpace = EColorSpace.Auto
             };
 
             var rightTex = new Texture_t {
-                handle = stereoRender.RightRT.GetNativeTexturePtr(),
+                handle = stereoRender.rightRT.GetNativeTexturePtr(),
                 eType = SteamVR.instance.textureType,
                 eColorSpace = EColorSpace.Auto
             };
@@ -220,46 +197,14 @@ public class StereoRender : MonoBehaviour {
             };
 
             // Submit frames to compositor
-            EVRCompositorError errorL = OpenVR.Compositor.Submit(EVREye.Eye_Left, ref leftTex, ref textureBounds, EVRSubmitFlags.Submit_Default);
-            EVRCompositorError errorR = OpenVR.Compositor.Submit(EVREye.Eye_Right, ref rightTex, ref textureBounds, EVRSubmitFlags.Submit_Default);
+            var errorL = OpenVR.Compositor.Submit(EVREye.Eye_Left, ref leftTex, ref textureBounds, EVRSubmitFlags.Submit_Default);
+            var errorR = OpenVR.Compositor.Submit(EVREye.Eye_Right, ref rightTex, ref textureBounds, EVRSubmitFlags.Submit_Default);
 
             // Optional: log errors during development
-            // if (errorL != EVRCompositorError.None) MelonLogger.Warning($"Left eye submit error: {errorL}");
-            // if (errorR != EVRCompositorError.None) MelonLogger.Warning($"Right eye submit error: {errorR}");
+            if (DebugMode) {
+                if (errorL != EVRCompositorError.None) Log.LogWarning($"Left eye submit error: {errorL}");
+                if (errorR != EVRCompositorError.None) Log.LogWarning($"Right eye submit error: {errorR}");
+            }
         }
-    }
-}
-
-internal static class Utils {
-    public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component {
-        if (gameObject == null)
-            throw new ArgumentNullException("GetOrAddComponent: gameObject is null!");
-
-        T comp = gameObject.GetComponent<T>();
-        if (comp == null)
-            comp = gameObject.AddComponent<T>();
-
-        return comp;
-    }
-    
-    public static Matrix4x4 ConvertToMatrix4x4(this HmdMatrix44_t hm) {
-        var m = new Matrix4x4();
-        m.m00 = hm.m0;
-        m.m01 = hm.m1;
-        m.m02 = hm.m2;
-        m.m03 = hm.m3;
-        m.m10 = hm.m4;
-        m.m11 = hm.m5;
-        m.m12 = hm.m6;
-        m.m13 = hm.m7;
-        m.m20 = hm.m8;
-        m.m21 = hm.m9;
-        m.m22 = hm.m10;
-        m.m23 = hm.m11;
-        m.m30 = hm.m12;
-        m.m31 = hm.m13;
-        m.m32 = hm.m14;
-        m.m33 = hm.m15;
-        return m;
     }
 }

@@ -1,108 +1,116 @@
 {
   "actions": [
     {
-      "name": "/actions/default/in/InteractUI",
+      "name": "/actions/MiSide/in/InteractUI",
       "type": "boolean"
     },
     {
-      "name": "/actions/default/in/Teleport",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/default/in/GrabPinch",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/default/in/GrabGrip",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/default/in/Pose",
+      "name": "/actions/MiSide/in/Pose",
       "type": "pose"
     },
     {
-      "name": "/actions/default/in/SkeletonLeftHand",
+      "name": "/actions/MiSide/in/SkeletonLeftHand",
       "type": "skeleton",
       "skeleton": "/skeleton/hand/left"
     },
     {
-      "name": "/actions/default/in/SkeletonRightHand",
+      "name": "/actions/MiSide/in/SkeletonRightHand",
       "type": "skeleton",
       "skeleton": "/skeleton/hand/right"
     },
     {
-      "name": "/actions/default/in/Squeeze",
-      "type": "vector1",
-      "requirement": "optional"
-    },
-    {
-      "name": "/actions/default/in/HeadsetOnHead",
-      "type": "boolean",
-      "requirement": "optional"
-    },
-    {
-      "name": "/actions/default/in/SnapTurnLeft",
-      "type": "boolean",
-      "requirement": "suggested"
-    },
-    {
-      "name": "/actions/default/in/SnapTurnRight",
+      "name": "/actions/MiSide/in/SnapTurnLeft",
       "type": "boolean"
     },
     {
-      "name": "/actions/default/out/Haptic",
-      "type": "vibration"
+      "name": "/actions/MiSide/in/SnapTurnRight",
+      "type": "boolean"
     },
     {
-      "name": "/actions/default/out/NewAction",
-      "type": "vibration"
+      "name": "/actions/MiSide/in/HeadsetOnHead",
+      "type": "boolean"
     },
     {
-      "name": "/actions/platformer/in/Move",
+      "name": "/actions/MiSide/in/WSAD_Move",
       "type": "vector2"
     },
     {
-      "name": "/actions/platformer/in/Jump",
+      "name": "/actions/MiSide/in/Shift_Run",
       "type": "boolean"
     },
     {
-      "name": "/actions/buggy/in/Steering",
+      "name": "/actions/MiSide/in/MouseLeftLick",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/MiSide/in/E_Interact",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/MiSide/in/Q_Command",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/MiSide/in/Space_Jump",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/MiSide/in/Enter",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/MiSide/in/ESC_Menu",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/MiSide/in/MouseMove_Rotate",
       "type": "vector2"
     },
     {
-      "name": "/actions/buggy/in/Throttle",
-      "type": "vector1"
-    },
-    {
-      "name": "/actions/buggy/in/Brake",
+      "name": "/actions/MiSide/in/LeftArrow",
       "type": "boolean"
     },
     {
-      "name": "/actions/buggy/in/Reset",
+      "name": "/actions/MiSide/in/RightArrow",
       "type": "boolean"
     },
     {
-      "name": "/actions/mixedreality/in/ExternalCamera",
-      "type": "pose",
-      "requirement": "optional"
+      "name": "/actions/MiSide/in/UpArrow",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/MiSide/in/DownArrow",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/MiSide/in/Hold_PinUI",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/MiSide/in/ToggleVRIK",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/MiSide/in/Grab_Left",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/MiSide/in/Grab_Right",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/MiSide/out/HapticLeft",
+      "type": "vibration"
+    },
+    {
+      "name": "/actions/MiSide/out/HapticRight",
+      "type": "vibration"
     }
   ],
   "action_sets": [
     {
-      "name": "/actions/default",
-      "usage": "single"
-    },
-    {
-      "name": "/actions/platformer",
-      "usage": "single"
-    },
-    {
-      "name": "/actions/buggy",
-      "usage": "single"
-    },
-    {
-      "name": "/actions/mixedreality",
-      "usage": "single"
+      "name": "/actions/MiSide",
+      "usage": "leftright"
     }
   ],
   "default_bindings": [
@@ -117,63 +125,14 @@
     {
       "controller_type": "knuckles",
       "binding_url": "bindings_knuckles.json"
-    },
-    {
-      "controller_type": "holographic_controller",
-      "binding_url": "bindings_holographic_controller.json"
-    },
-    {
-      "controller_type": "vive_cosmos_controller",
-      "binding_url": "bindings_vive_cosmos_controller.json"
-    },
-    {
-      "controller_type": "logitech_stylus",
-      "binding_url": "bindings_logitech_stylus.json"
-    },
-    {
-      "controller_type": "vive_cosmos",
-      "binding_url": "binding_vive_cosmos.json"
-    },
-    {
-      "controller_type": "vive",
-      "binding_url": "binding_vive.json"
-    },
-    {
-      "controller_type": "indexhmd",
-      "binding_url": "binding_index_hmd.json"
-    },
-    {
-      "controller_type": "vive_pro",
-      "binding_url": "binding_vive_pro.json"
-    },
-    {
-      "controller_type": "rift",
-      "binding_url": "binding_rift.json"
-    },
-    {
-      "controller_type": "holographic_hmd",
-      "binding_url": "binding_holographic_hmd.json"
-    },
-    {
-      "controller_type": "vive_tracker_camera",
-      "binding_url": "binding_vive_tracker_camera.json"
     }
   ],
   "localization": [
     {
       "language_tag": "en_US",
-      "/actions/default/in/GrabGrip": "Grab Grip",
-      "/actions/default/in/GrabPinch": "Grab Pinch",
-      "/actions/default/in/HeadsetOnHead": "Headset on head (proximity sensor)",
-      "/actions/default/in/InteractUI": "Interact With UI",
-      "/actions/default/in/Pose": "Pose",
-      "/actions/default/in/SkeletonLeftHand": "Skeleton (Left)",
-      "/actions/default/in/SkeletonRightHand": "Skeleton (Right)",
-      "/actions/default/in/Teleport": "Teleport",
-      "/actions/default/out/Haptic": "Haptic",
-      "/actions/platformer/in/Jump": "Jump",
-      "/actions/default/in/SnapTurnLeft": "Snap Turn (Left)",
-      "/actions/default/in/SnapTurnRight": "Snap Turn (Right)"
+      "/actions/MiSide": "MiSide VR Actions",
+      "/actions/MiSide/in/Pose": "Controller Pose",
+      "/actions/MiSide/in/InteractUI": "Interact with UI"
     }
   ]
 }

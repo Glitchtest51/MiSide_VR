@@ -6,13 +6,8 @@ using static MiSide_VR.Plugin;
 
 namespace MiSide_VR.Input;
 
-/// <summary>
-/// Provides low-level access to OpenVR input actions defined in the action manifest (e.g., buttons, thumbsticks, poses).
-/// Handles registration of action handles, updates input state each frame, and computes hand velocities from pose data.
-/// </summary>
 public static class NativeVRInput
 {
-    // Stores pre-registered OpenVR action handles by action name (as defined in the action manifest JSON)
     private static Dictionary<string, ulong> actionHandles = new Dictionary<string, ulong>();
 
     // Handle for the default action set ("/actions/default")

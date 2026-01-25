@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 using static MiSide_VR.Plugin;
 
@@ -10,158 +11,172 @@ public class VRSystem : MonoBehaviour {
     
     public static VRSystem Instance { get; private set; }
     
-    private int UpdateCounter = 0;
+    private int _frameCounter;
     
-    private Camera UsedCamera = null;
+    private Camera _lastCamera;
     
-    private string UsedSceneName = "";
+    private string _lastSceneName = "";
     
-    private bool RespawnPlayer = false;
-    
-    private bool RigCreated = false;
+    private bool _rigCreated;
     
     private void Awake() {
-        Log.LogMessage("########### INITIALIZING VR SYSTEM #############");
+        Log.LogInfo("[VRSystem] VRSystem Created.");
         
-        if (Instance != null) {
-            Log.LogError("Trying to create duplicate VRSystem instance! Disabling this one.");
+        if (Instance) {
+            Log.LogWarning("[VRSystem] Duplicate VRSystem detected, destroying duplicate.");
+            Destroy(gameObject);
             enabled = false;
             return;
         }
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        // Subscribe to scene load events (currently used for cleanup/extensibility)
-        // onSceneLoaded += new Action<Scene, LoadSceneMode>(OnSceneLoaded);
+        
+        onSceneLoaded += OnSceneLoaded;
     }
     
     private void LateUpdate() {
-        UpdateCounter++;
+        _frameCounter++;
         
-        if (UpdateCounter >= 50) {
-            UpdateCounter = 0;
-            
-            var sceneAndCam = FindActiveGameplayScene();
-            
-            string sceneName = sceneAndCam.scene.name;
-            // if (sceneName == "BlankScene" || sceneName == "SonsMain" || sceneName == "SonsTitleScene")
-            if (true) {
-                var activeCam = sceneAndCam.camera;
-                if (activeCam != null) {
-                    if (sceneAndCam.scene.name != UsedSceneName || UsedCamera == null || activeCam != UsedCamera) {
-                        Log.LogWarning($"[VRSystem] Scene or camera changed — respawning VR player rig");
-                        UsedSceneName = sceneAndCam.scene.name;
-                        UsedCamera = activeCam;
-                        
-                        if (!RigCreated) {
-                            CreateCameraRig(UsedCamera);
-                        }
-                    } else {
-                        if (VRPlayer.Instance != null && sceneAndCam.camera != null) {
-                            VRPlayer.Instance.SetSceneAndCamera(sceneAndCam);
-                        }
-                    }
-                } else {
-                    Log.LogInfo($"[VRSystem] No active camera found in scene: {sceneAndCam.scene.name}");
-                }
-            } else {
-                // Not a gameplay scene — clear references
-                UsedCamera = null;
-                // Optional: hide VR rig here if needed
-            }
+        if (_frameCounter >= 50) {
+            _frameCounter = 0;
+
+            UpdateActiveCamera();
         }
     }
+
+    private void UpdateActiveCamera() {
+        var sceneAndCamera = FindActiveSceneAndCamera();
+            
+        var activeCamera = sceneAndCamera.Camera;
+        var activeScene = sceneAndCamera.Scene;
+        if (activeCamera) {
+            if (activeScene.name != _lastSceneName || !_lastCamera || activeCamera != _lastCamera) {
+                Log.LogWarning($"[VRSystem] Scene or camera changed, respawning VR player rig...");
+                _lastSceneName = activeScene.name;
+                _lastCamera = activeCamera;
+                    
+                if (!_rigCreated) 
+                    CreateCameraRig(_lastCamera);
+
+                var stereoRender = VRPlayer.Instance?.StereoRender;
+                if (!stereoRender) return;
+                    
+                CopyCameraData(_lastCamera, stereoRender.headCamera);
+                CopyCameraData(_lastCamera, stereoRender.leftCamera);
+                CopyCameraData(_lastCamera, stereoRender.rightCamera);
+            } else if (VRPlayer.Instance) 
+                VRPlayer.Instance.SetSceneAndCamera(sceneAndCamera);
+        } else Log.LogInfo($"[VRSystem] No active camera found in scene: {activeScene.name}");
+    }
     
-    private ActiveSceneWithCamera FindActiveGameplayScene() {
-        ActiveSceneWithCamera result = new ActiveSceneWithCamera();
-
-        int sceneCount = SceneManager.sceneCount;
-        for (int i = 0; i < sceneCount; i++) {
-            var scene = SceneManager.GetSceneAt(i);
-            if (!scene.IsValid() || !scene.isLoaded)
-                continue;
-
-            result.scene = scene;
-            bool hasActiveCamera = false;
-
-            // Search all root objects in the scene for cameras
-            var rootObjects = scene.GetRootGameObjects();
-            foreach (var root in rootObjects) {
-                var cameras = root.GetComponentsInChildren<Camera>(true);
-                foreach (var cam in cameras) {
-                    if (!cam.isActiveAndEnabled)
-                        continue;
-                    
-                    // if (cam.name.Equals("MainCameraFP"))
-                    // {
-                    //     result.camera = cam;
-                    //     hasActiveCamera = true;
-                    //     break;
-                    // }
-                    
-                    result.camera = cam;
-                    hasActiveCamera = true;
-                    break;
-                }
-                
-                if (hasActiveCamera)
-                    break;
-            }
-
-            if (hasActiveCamera)
-                break;
+    private void CopyCameraData(Camera source, Camera target)
+    {
+        if (!source || !target)
+            return;
+        
+        target.clearFlags = source.clearFlags;
+        target.backgroundColor = source.backgroundColor;
+        target.orthographic = source.orthographic;
+        target.orthographicSize = source.orthographicSize;
+        target.fieldOfView = source.fieldOfView;
+        target.nearClipPlane = source.nearClipPlane;
+        target.farClipPlane = source.farClipPlane;
+        target.cullingMask = source.cullingMask;
+        target.depth = source.depth;
+        target.renderingPath = source.renderingPath;
+        target.allowHDR = source.allowHDR;
+        target.allowMSAA = source.allowMSAA;
+        
+        var sourcePpLayer = source.GetComponent<PostProcessLayer>();
+        if (!sourcePpLayer) {
+            Log.LogWarning($"[VRSystem] No PostProcessLayer found in Camera: {source.name}, Tag: {source.tag}, Scene: {source.scene.name}.");
+            return;
         }
+
+        var targetPpLayer = target.gameObject.GetOrAddComponent<PostProcessLayer>();
+        targetPpLayer.m_Resources = sourcePpLayer.m_Resources;
+        targetPpLayer.volumeLayer = sourcePpLayer.volumeLayer;
+        targetPpLayer.antialiasingMode = sourcePpLayer.antialiasingMode;
+        targetPpLayer.stopNaNPropagation = sourcePpLayer.stopNaNPropagation;
+        targetPpLayer.finalBlitToCameraTarget = sourcePpLayer.finalBlitToCameraTarget;
+        targetPpLayer.volumeTrigger = target.transform;
+    }
+
+    private static ActiveSceneAndCamera FindActiveSceneAndCamera() {
+        var result = new ActiveSceneAndCamera();
+        var cam = Camera.main;
+
+        if (!cam) {
+            Camera[] cameras = FindObjectsOfType<Camera>(true);
+            foreach (var c in cameras) {
+                if (!c.isActiveAndEnabled)
+                    continue;
+
+                cam = c;
+                break;
+            }
+        }
+
+        if (!cam)
+            return result;
+
+        result.Camera = cam;
+        result.Scene = cam.gameObject.scene;
 
         return result;
-    }
-    
-    private void CleanupExistingRigs() {
-        for (int i = transform.childCount - 1; i >= 0; i--) {
-            Transform child = transform.GetChild(i);
-            if (child.name == "[VRCameraRig]") {
-                Log.LogInfo("Cleaning up old VRCameraRig");
-                Destroy(child.gameObject);
-            }
-        }
-
-        RigCreated = false;
     }
     
     public void CreateCameraRig(Camera usedCamera) {
         CleanupExistingRigs();
 
-        if (VRPlayer.Instance == null) {
-            Log.LogWarning($"[VRSystem] #### CREATING NEW VR CAMERA RIG ####");
-            GameObject rig = new GameObject("[VRCameraRig]");
-            rig.transform.SetParent(transform, false);
-            rig.AddComponent<VRPlayer>();
-            RigCreated = true;
-        }
-    }
-    
-    private void OnSceneLoaded(int buildIndex, string sceneName) {
-        // Intentionally empty
-    }
-    
-    private void TogglePlayerCam(bool toggle) {
-        if (VRPlayer.Instance == null || VRPlayer.Instance.StereoRender == null)
+        if (VRPlayer.Instance) 
             return;
-
-        int mask = toggle ? 0 : StereoRender.defaultCullingMask;
-        VRPlayer.Instance.StereoRender.LeftCam.cullingMask = mask;
-        VRPlayer.Instance.StereoRender.RightCam.cullingMask = mask;
+        
+        Log.LogWarning($"[VRSystem] Creating new VR Camera Rig...");
+        GameObject rig = new GameObject("[VRCameraRig]");
+        rig.transform.SetParent(transform, false);
+        rig.AddComponent<VRPlayer>();
+        _rigCreated = true;
+    }
+    
+    private void CleanupExistingRigs() {
+        for (var i = transform.childCount - 1; i >= 0; i--) {
+            var child = transform.GetChild(i);
+            if (child.name == "[VRCameraRig]") {
+                Destroy(child.gameObject);
+                if (DebugMode) Log.LogWarning($"[VRSystem] Destroying VR Camera Rig {child.name}...");
+            }
+        }
+        
+        _rigCreated = false;
+    }
+    
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+        UpdateActiveCamera();
     }
     
     private void OnDestroy() {
-        // onSceneLoaded -= new Action<Scene, LoadSceneMode>(OnSceneLoaded);
+        onSceneLoaded -= OnSceneLoaded;
+        if (Instance == this)
+            Instance = null;
+    }
+    
+    // Unused
+    private void TogglePlayerCam(bool toggle) {
+        if (!VRPlayer.Instance || !VRPlayer.Instance.StereoRender)
+            return;
+
+        var mask = toggle ? 0 : StereoRender.DefaultCullingMask;
+        VRPlayer.Instance.StereoRender.leftCamera.cullingMask = mask;
+        VRPlayer.Instance.StereoRender.rightCamera.cullingMask = mask;
     }
 
     private void OnEnable() { 
-        Log.LogInfo("[VRSystem] VRSystem ENABLED");
+        Log.LogInfo("[VRSystem] VRSystem Enabled.");
     }
 
     private void OnDisable() {
-        Log.LogInfo("[VRSystem] VRSystem DISABLED");
+        Log.LogInfo("[VRSystem] VRSystem Disabled.");
     }
 }

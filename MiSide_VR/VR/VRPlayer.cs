@@ -1,10 +1,8 @@
 ﻿using System;
 using UnityEngine;
-using Valve.VR;
-using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using static MiSide_VR.Plugin;
-using Mathf = UnityEngine.Mathf;
 
 namespace MiSide_VR.VR;
 
@@ -12,141 +10,107 @@ public class VRPlayer : MonoBehaviour {
     public VRPlayer(IntPtr value) : base(value) { }
     
     public static VRPlayer Instance { get; private set; }
-
-    public Transform Origin { get; private set; }
-    
-    public Transform Body { get; private set; }
-    
-    public Camera Camera { get; private set; }
-    
-    public Camera FPSCam { get; private set; }
     
     public StereoRender StereoRender { get; private set; }
-    
-    public string lastCameraUsed = "";
-    
-    
-    public bool isUIMode = false;
-    
-    public GameObject LocalPlayer;
-    
-    private Camera UsedCamera = null;
-    
-    private string UsedSceneName = "";
-    
-    public string lastCameraName = "";
-    
-    
-    // private Il2CppFirstPersonCharacter firstPersonCharacter;
 
-    // === CONFIGURABLE ALIGNMENT OFFSETS ===
+    private Transform Body { get; set; }
+
+    private Transform Origin { get; set; }
+    
+    public HandController LeftHand { get; private set; }
+    public HandController RightHand { get; private set; }
+    
+    public GameObject localPlayer;
+    
+    public Camera Camera;
     
     public Vector3 positionOffset = new Vector3(0.0f, 0.05f, -0.10f);
     
-    public float yawOffset = 0f;
-    
     public float bodyRotationSpeed = 10f;
 
-    // === INPUT SMOOTHING ===
-
-    private Vector2 smoothedInput = Vector2.zero;
-    private float inputSmoothSpeed = 8f;
-
-    // === RUN STATE MANAGEMENT ===
-
-    private bool isRunning = false;
-    private float lastRunActivationTime = 0f;
-    private float runActivationCooldown = 0.25f;
-
-    // === SNAP TURN CONFIGURATION ===
-
-    private float snapTurnOffset = 0f;
-    private bool snapTurnReset = true;
-    private float snapAngle = 30f;
-    private float stickThreshold = 0.7f;
-    
-    // private Il2CppPlayerAnimationControl _cachedAnimController;
-    
-    private bool harmonyIsReady = false;
+    // // === RUN STATE MANAGEMENT ===
+    //
+    // private bool isRunning = false;
+    // private float lastRunActivationTime = 0f;
+    // private float runActivationCooldown = 0.25f;
+    //
+    // // === SNAP TURN CONFIGURATION ===
+    //
+    // private float snapTurnOffset = 0f;
+    // private bool snapTurnReset = true;
+    // private float snapAngle = 30f;
+    // private float stickThreshold = 0.7f;
     
     private void Awake() {
-        if (Instance != null) {
-            Log.LogError("[VRPlayer] ## Duplicate VRPlayer detected! Destroying instance. ##");
+        Log.LogInfo("[VRPlayer] VRPlayer Created.");
+        
+        if (Instance) {
+            Log.LogWarning("[VRPlayer] Duplicate VRPlayer detected, destroying duplicate.");
             Destroy(gameObject);
             return;
         }
-
-        Log.LogInfo("[VRPlayer] ## Creating VRPlayer instance ##");
+        
         Instance = this;
-
-        // Subscribe to scene load events (currently unused but kept for extensibility)
+        
         // onSceneLoaded += new Action<Scene, LoadSceneMode>(OnSceneLoaded);
         
-        // Start async setup after a short delay to ensure game systems are ready
         Setup();
     }
     
-    private void OnSceneLoaded(int buildIndex, string sceneName) {
-        // Intentionally empty
-    }
-    
     public void Setup() {
-        if (StereoRender != null) {
+        Log.LogInfo("[VRPlayer] Initializing VRPlayer...");
+        if (StereoRender) 
             Destroy(StereoRender);
-            Log.LogInfo("[VRPlayer] #### STEREORENDER DESTROYED ####");
-        }
 
         Body = transform;
         Origin = transform.parent;
-
-        // Ensure the Origin exists as the world root of the VR rig
-        if (Origin == null) {
-            Origin = new GameObject("[VROrigin]").transform;
-            transform.SetParent(Origin, false);
-        }
-
-        // Ensure VR rig persists across scene loads
-        DontDestroyOnLoad(Origin);
-
-        // Attach stereo rendering system to the body
-        StereoRender = Body.gameObject.AddComponent<StereoRender>();
-    }
-    
-    public void SetSceneAndCamera(ActiveSceneWithCamera activeSceneAndCam) {
-        UsedSceneName = activeSceneAndCam.scene.name;
-        UsedCamera = activeSceneAndCam.camera;
-    
-        if (UsedCamera != null) {
-            // Detach camera from render target (we render via StereoRender instead)
-            UsedCamera.targetTexture = null;
-            UsedCamera.pixelRect = new Rect(0, 0, 1080, 720); // Optional: small preview
         
-            // // Locate the player character in the transform hierarchy
-            // LocalPlayer = FindLocalPlayerFromCamera(UsedCamera);
-            // if (LocalPlayer != null) {
-            //     firstPersonCharacter = LocalPlayer.GetComponent<Il2CppFirstPersonCharacter>();
-            // }
-            //
-            // // Disable mouse-based rotation components
-            // DisableMouseRotation();
-        }
+        if (!Origin) 
+            Origin = new GameObject("[VROrigin]").transform;
+            
+        Body.SetParent(Origin, false);
+        DontDestroyOnLoad(Origin);
+        
+        StereoRender = Body.gameObject.AddComponent<StereoRender>();
+        
+        var leftHandObj = new GameObject("LeftHand");
+        leftHandObj.transform.SetParent(Body, false);
+        leftHandObj.transform.localPosition = Vector3.zero;
+        LeftHand = leftHandObj.AddComponent<HandController>();
+        LeftHand.Setup(HandController.HandType.Left);
+        
+        var rightHandObj = new GameObject("RightHand");
+        rightHandObj.transform.SetParent(Body, false);
+        rightHandObj.transform.localPosition = Vector3.zero;
+        RightHand = rightHandObj.AddComponent<HandController>();
+        RightHand.Setup(HandController.HandType.Right);
+        
+        Log.LogInfo("[VRPlayer] VRPlayer Initialized.");
     }
     
-    private void Update() {
-        // All VR logic runs in LateUpdate to ensure camera positions are final
-    }
-    
-    private void LateUpdate() {
-        HandleUpdate();
-    }
-    
-    private void HandleUpdate() {
+    private void LateUpdate() { 
         // --- POSITIONING: Sync VR origin to game camera ---
-        if (UsedCamera != null && Origin != null) {
-            Vector3 basePosition = UsedCamera.transform.position;
-            // Apply offset in camera-local space (e.g., lower height, shift back)
-            Vector3 finalPosition = basePosition + UsedCamera.transform.TransformDirection(positionOffset);
+        if (Camera && Origin) {
+            Vector3 basePosition = Camera.transform.position;
+            Vector3 finalPosition = basePosition + Camera.transform.TransformDirection(positionOffset);
             Origin.position = finalPosition;
+        }
+        
+        // --- BODY ALIGNMENT: Rotate player to match HMD forward direction ---
+        if (localPlayer && StereoRender?.head) {
+            if (Camera) {
+                Camera.transform.rotation = StereoRender.head.rotation;
+            }
+            
+            var headForward = StereoRender.head.forward;
+            headForward.y = 0f;
+        
+            if (headForward.magnitude > 0.01f) {
+                headForward.Normalize();
+                Quaternion targetRotation = Quaternion.LookRotation(headForward, Vector3.up);
+                
+                localPlayer.transform.rotation = Quaternion.Slerp(localPlayer.transform.rotation, targetRotation, Time.deltaTime * bodyRotationSpeed);
+            }
         }
         
         // --- SNAP TURN: Right thumbstick horizontal input ---
@@ -173,31 +137,6 @@ public class VRPlayer : MonoBehaviour {
         //     // Reset flag when stick is centered, allowing next turn
         //     snapTurnReset = true;
         // }
-        
-        // --- BODY ALIGNMENT: Rotate player to match HMD forward direction ---
-        if (LocalPlayer != null && StereoRender?.Head != null) {
-            // StereoRender.Head already includes snap-turn rotation (inherits from parent)
-            if (UsedCamera != null) {
-                // Sync game camera rotation to HMD (for UI, weapon alignment, etc.)
-                UsedCamera.transform.rotation = StereoRender.Head.rotation;
-            }
-        
-            // Project HMD forward onto horizontal plane (ignore vertical look)
-            Vector3 headForward = StereoRender.Head.forward;
-            headForward.y = 0f;
-        
-            if (headForward.magnitude > 0.01f) {
-                headForward.Normalize();
-                Quaternion targetRotation = Quaternion.LookRotation(headForward, Vector3.up);
-        
-                // Smoothly rotate the player character toward HMD direction
-                LocalPlayer.transform.rotation = Quaternion.Slerp(
-                    LocalPlayer.transform.rotation,
-                    targetRotation,
-                    Time.deltaTime * bodyRotationSpeed
-                );
-            }
-        }
         
         // --- LOCOMOTION & RUNNING ---
         // if (firstPersonCharacter != null)
@@ -233,92 +172,72 @@ public class VRPlayer : MonoBehaviour {
         // }
     }
     
-    private GameObject FindLocalPlayerFromCamera(Camera camera) {
-        if (camera == null) return null;
+    private static readonly HashSet<string> ExcludedScenes = new()
+    {
+        "SceneAihasto",
+        "SceneLoading",
+        "SceneMenu",
+        "MinigameShooter"
+    };
+    
+    public void SetSceneAndCamera(ActiveSceneAndCamera activeSceneAndCamera) {
+        var scene = activeSceneAndCamera.Scene;
+        Camera = activeSceneAndCamera.Camera;
+    
+        if (Camera) {
+            if (!ExcludedScenes.Contains(scene.name)) 
+                localPlayer = FindLocalPlayerFromCamera(Camera);
+            else 
+                localPlayer = null;
 
-        Transform current = camera.transform;
-        for (int i = 0; i < 3; i++) {
-            current = current.parent;
-            if (current == null) break;
-
-            if (current.name == "LookObject") {
-                // Climb up until we find "LocalPlayer" or reach the root
-                while (current.parent != null && current.parent.name != "LocalPlayer" && current.parent.parent != null)
-                    current = current.parent;
-
-                if (current.parent != null && current.parent.name == "LocalPlayer") {
-                    Log.LogInfo($"[VRPlayer] Found player root: {current.parent.name}");
-                    return current.parent.gameObject;
-                }
-            }
+            // if (LocalPlayer != null) 
+            //     firstPersonCharacter = LocalPlayer.GetComponent<Il2CppFirstPersonCharacter>();
+            
+            DisableMouseRotation();
         }
-
-        Log.LogWarning("[VRPlayer] Could not find LocalPlayer from camera.");
-        return null;
     }
     
+    private GameObject FindLocalPlayerFromCamera(Camera camera) {
+        if (!camera) return null;
+
+        var current = camera.transform;
+        while (current) {
+            if (current.name == "Player")
+                return current.gameObject;
+
+            current = current.parent;
+        }
+    
+        if (DebugMode) 
+            Log.LogWarning("[VRPlayer] Could not find Player from camera: " + camera.name);
+        return null;
+    }
+
+    
     private void DisableMouseRotation() {
-        // if (LocalPlayer != null)
-        // {
-        //     var rotator = LocalPlayer.GetComponent<Il2CppSimpleMouseRotator>();
-        //     if (rotator != null)
-        //     {
-        //         rotator.enabled = false;
-        //     }
-        // }
-        //
-        // if (UsedCamera != null)
-        // {
-        //     var camRotator = UsedCamera.GetComponent<Il2CppSimpleMouseRotator>();
-        //     if (camRotator != null)
-        //     {
-        //         camRotator.enabled = false;
-        //     }
-        // }
+        if (localPlayer)
+        {
+            var movementController = localPlayer.GetComponent<PlayerMove>();
+            if (movementController)
+                movementController.enabled = false;
+        }
     }
     
     private void OnDestroy() {
-        Log.LogWarning("[VRPlayer] *** VRPlayer DESTROYED ***");
         // onSceneLoaded -= new Action<Scene, LoadSceneMode>(OnSceneLoaded);
         if (Instance == this)
             Instance = null;
     }
     
-    private void SetOriginHome() {
-        SetOriginPosRotScl(new Vector3(0f, 0f, 0f), new Vector3(0, 90, 0), new Vector3(1, 1, 1));
-    }
-    
-    public void SetOriginPosRotScl(Vector3 pos, Vector3 euler, Vector3 scale) {
-        Origin.position = pos;
-        Origin.localEulerAngles = euler;
-        Origin.localScale = scale;
-    }
-    
-    public void SetOriginScale(float scale) {
-        Origin.localScale = new Vector3(scale, scale, scale);
-    }
-    
-    public Vector3 GetWorldForward() {
-        return StereoRender?.Head?.forward ?? Vector3.forward;
-    }
-    
-    public Vector3 GetFlatForwardDirection(Vector3 forward) {
-        forward.y = 0;
-        return forward.normalized;
-    }
-    
-    public float GetPlayerHeight() {
-        if (StereoRender?.Head == null)
-            return 1.8f; // Default human height
-
-        return Mathf.Abs(StereoRender.Head.localPosition.y);
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+        // Intentionally empty
     }
     
     private void OnEnable() {
-        Log.LogInfo("[VRPlayer] VRPlayer ENABLED");
+        Log.LogInfo("[VRPlayer] VRPlayer Enabled.");
     }
     
     private void OnDisable() {
-        Log.LogInfo("[VRPlayer] VRPlayer DISABLED");
+        Log.LogInfo("[VRPlayer] VRPlayer Disabled.");
     }
 }
