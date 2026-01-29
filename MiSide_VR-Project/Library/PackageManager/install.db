@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "packages": {
+    "com.valvesoftware.unity.openvr": {
+      "tarball": {
+        "hash": "970ac47786c4",
+        "mtime": 1705523035000,
+        "size": 19523367,
+        "localPath": "D:\\My-Stuff\\Documents\\Games\\miside-modding\\Bepinex\\MiSide_VR\\MiSide_VR-Project\\Assets\\SteamVR\\OpenVRUnityXRPackage\\Editor\\com.valvesoftware.unity.openvr-1.2.1.tgz"
+      }
+    }
+  }
+}

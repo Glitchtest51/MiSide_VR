@@ -1,0 +1,16 @@
+{
+  "source": "Unity",
+  "applications": [
+    {
+      "app_key": "application.generated.unity.miside_vrproject.exe",
+      "launch_type": "url",
+      "url": "steam://launch/",
+      "action_manifest_path": "D:\\My-Stuff\\Documents\\Games\\miside-modding\\Bepinex\\MiSide_VR\\MiSide_VR-Project\\Assets\\StreamingAssets\\SteamVR\\actions.json",
+      "strings": {
+        "en_us": {
+          "name": "MiSide_VR-Project [Testing]"
+        }
+      }
+    }
+  ]
+}
