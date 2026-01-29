@@ -8,6 +8,9 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
+using HarmonyLib;
+using MiSide_VR.UI;
+using MiSide_VR.VRInput;
 using MiSide_VR.VR;
 using Valve.VR;
 using UnityEngine.SceneManagement;
@@ -36,8 +39,6 @@ public class Plugin : BasePlugin {
     
     public delegate void OnSceneLoadedEvent(Scene scene, LoadSceneMode mode);
     public static OnSceneLoadedEvent onSceneLoaded;
-    
-    // private KeyboardHack kh = new KeyboardHack();
     
     internal static bool VREnabled;
 
@@ -68,7 +69,7 @@ public class Plugin : BasePlugin {
                 return;
             }
             
-            // NativeVRInput.Initialize();
+            VRInputManager.Initialize();
 
             if (DebugMode) {
                 Log.LogDebug($"[SteamVR] Total actions: {SteamVR_Input.actions?.Length ?? -1}");
@@ -82,6 +83,8 @@ public class Plugin : BasePlugin {
         }
         
         SetupIL2CPPClassInjections();
+
+        Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
         
         SceneManager.sceneLoaded += new Action<Scene, LoadSceneMode>(OnSceneLoaded);
 
@@ -94,7 +97,9 @@ public class Plugin : BasePlugin {
         ClassInjector.RegisterTypeInIl2Cpp<VRPlayer>();
         ClassInjector.RegisterTypeInIl2Cpp<StereoRender>();
         ClassInjector.RegisterTypeInIl2Cpp<VRLoop>();
-        ClassInjector.RegisterTypeInIl2Cpp<HandController>();
+        ClassInjector.RegisterTypeInIl2Cpp<ControllerTracking>();
+        ClassInjector.RegisterTypeInIl2Cpp<VRPointerInput>();
+        ClassInjector.RegisterTypeInIl2Cpp<UIFollowCamera>();
     }
     
     public static bool LoadDll(string dll) {
@@ -160,12 +165,7 @@ public class VRLoop : MonoBehaviour {
             }
         }
         
-        if (Plugin.VREnabled) {
-            // NativeVRInput.Update();
-        }
-
-        // Inject simulated keyboard/mouse input based on VR gestures
-        // kh?.InjectMovement();
+        VRInputManager.UpdateInput();
     }
     
     private void LateUpdate() {

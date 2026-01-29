@@ -1,6 +1,8 @@
 ﻿using System;
+using Il2CppSystem.Reflection;
 using UnityEngine;
 using System.Collections.Generic;
+using MiSide_VR.VRInput;
 using UnityEngine.SceneManagement;
 using static MiSide_VR.Plugin;
 
@@ -12,35 +14,26 @@ public class VRPlayer : MonoBehaviour {
     public static VRPlayer Instance { get; private set; }
     
     public StereoRender StereoRender { get; private set; }
-
     private Transform Body { get; set; }
-
     private Transform Origin { get; set; }
     
-    public HandController LeftHand { get; private set; }
-    public HandController RightHand { get; private set; }
+    public ControllerTracking Left { get; private set; }
+    public ControllerTracking Right { get; private set; }
     
     public GameObject localPlayer;
-    
-    public Camera Camera;
-    
-    public Vector3 positionOffset = new Vector3(0.0f, 0.05f, -0.10f);
-    
-    public float bodyRotationSpeed = 10f;
+    public Camera camera;
+    public Vector3 positionOffset = new(0.0f, 0.05f, -0.10f);
 
     // // === RUN STATE MANAGEMENT ===
     //
     // private bool isRunning = false;
     // private float lastRunActivationTime = 0f;
     // private float runActivationCooldown = 0.25f;
-    //
-    // // === SNAP TURN CONFIGURATION ===
-    //
-    // private float snapTurnOffset = 0f;
-    // private bool snapTurnReset = true;
-    // private float snapAngle = 30f;
-    // private float stickThreshold = 0.7f;
-    
+
+    private bool _snapTurnReset = true;
+    private const float _snapAngle = 30f;
+    private const float _stickThreshold = 0.7f;
+
     private void Awake() {
         Log.LogInfo("[VRPlayer] VRPlayer Created.");
         
@@ -52,7 +45,7 @@ public class VRPlayer : MonoBehaviour {
         
         Instance = this;
         
-        // onSceneLoaded += new Action<Scene, LoadSceneMode>(OnSceneLoaded);
+        // onSceneLoaded += OnSceneLoaded;
         
         Setup();
     }
@@ -66,7 +59,7 @@ public class VRPlayer : MonoBehaviour {
         Origin = transform.parent;
         
         if (!Origin) 
-            Origin = new GameObject("[VROrigin]").transform;
+            Origin = new GameObject("[VR_Globals]").transform;
             
         Body.SetParent(Origin, false);
         DontDestroyOnLoad(Origin);
@@ -76,67 +69,61 @@ public class VRPlayer : MonoBehaviour {
         var leftHandObj = new GameObject("LeftHand");
         leftHandObj.transform.SetParent(Body, false);
         leftHandObj.transform.localPosition = Vector3.zero;
-        LeftHand = leftHandObj.AddComponent<HandController>();
-        LeftHand.Setup(HandController.HandType.Left);
+        Left = leftHandObj.AddComponent<ControllerTracking>();
+        Left.Setup(ControllerTracking.HandType.Left);
         
         var rightHandObj = new GameObject("RightHand");
         rightHandObj.transform.SetParent(Body, false);
         rightHandObj.transform.localPosition = Vector3.zero;
-        RightHand = rightHandObj.AddComponent<HandController>();
-        RightHand.Setup(HandController.HandType.Right);
+        Right = rightHandObj.AddComponent<ControllerTracking>();
+        Right.Setup(ControllerTracking.HandType.Right);
         
         Log.LogInfo("[VRPlayer] VRPlayer Initialized.");
     }
     
     private void LateUpdate() { 
-        // --- POSITIONING: Sync VR origin to game camera ---
-        if (Camera && Origin) {
-            Vector3 basePosition = Camera.transform.position;
-            Vector3 finalPosition = basePosition + Camera.transform.TransformDirection(positionOffset);
-            Origin.position = finalPosition;
-        }
-        
-        // --- BODY ALIGNMENT: Rotate player to match HMD forward direction ---
-        if (localPlayer && StereoRender?.head) {
-            if (Camera) {
-                Camera.transform.rotation = StereoRender.head.rotation;
-            }
+        if (camera && Body) {
+            var basePosition = camera.transform.position;
+            var finalPosition = basePosition + camera.transform.TransformDirection(positionOffset);
+            finalPosition.y -= 1.0f;
+            Body.position = finalPosition;
             
-            var headForward = StereoRender.head.forward;
-            headForward.y = 0f;
-        
-            if (headForward.magnitude > 0.01f) {
-                headForward.Normalize();
-                Quaternion targetRotation = Quaternion.LookRotation(headForward, Vector3.up);
-                
-                localPlayer.transform.rotation = Quaternion.Slerp(localPlayer.transform.rotation, targetRotation, Time.deltaTime * bodyRotationSpeed);
+            var cameraEuler = camera.transform.eulerAngles;
+            Body.rotation = Quaternion.Euler(0f, cameraEuler.y, 0f);
+        }
+
+        if (localPlayer) {
+            var playerMove = localPlayer.GetComponent<PlayerMove>();
+            if (playerMove) {
+                var rightStick = VRInputManager.GetThumbstick("Turn");
+                if (Mathf.Abs(rightStick.x) > _stickThreshold) {
+                    if (_snapTurnReset) {
+                        var direction = (rightStick.x > 0) ? _snapAngle : -_snapAngle;
+
+                        if (playerMove) {
+                            var currentRotation = localPlayer.transform.eulerAngles.y;
+                            var newRotation = currentRotation + direction;
+
+                            playerMove.TeleportRotate(newRotation);
+                        }
+
+                        _snapTurnReset = false;
+                    }
+                }
+                else if (Mathf.Abs(rightStick.x) < 0.2f) {
+                    _snapTurnReset = true;
+                }
+
+                // var vrMovement = VRInputManager.GetThumbstick("Move");
+                // if (Mathf.Abs(vrMovement.x) > 0.1f || Mathf.Abs(vrMovement.y) > 0.1f) {
+                //     if (vrMovement.x > 0.1f) playerMove.moveH = 1;
+                //     else if (vrMovement.x < -0.1f) playerMove.moveH = -1;
+                //
+                //     if (vrMovement.y > 0.1f) playerMove.moveV = 1;
+                //     else if (vrMovement.y < -0.1f) playerMove.moveV = -1;
+                // }
             }
         }
-        
-        // --- SNAP TURN: Right thumbstick horizontal input ---
-        // UnityEngine.Vector2 rightStick = NativeVRInput.GetVector2("ThumbstickRight");
-        // if (Mathf.Abs(rightStick.x) > stickThreshold)
-        // {
-        //     if (snapTurnReset)
-        //     {
-        //         // Determine turn direction (+30° or -30°)
-        //         float direction = (rightStick.x > 0) ? snapAngle : -snapAngle;
-        //         snapTurnOffset += direction;
-        //
-        //         // Rotate the entire VR rig (StereoRender.transform is the root under Body)
-        //         if (StereoRender != null)
-        //         {
-        //             StereoRender.transform.Rotate(0, direction, 0, Space.World);
-        //         }
-        //
-        //         snapTurnReset = false;
-        //     }
-        // }
-        // else if (Mathf.Abs(rightStick.x) < 0.2f)
-        // {
-        //     // Reset flag when stick is centered, allowing next turn
-        //     snapTurnReset = true;
-        // }
         
         // --- LOCOMOTION & RUNNING ---
         // if (firstPersonCharacter != null)
@@ -182,16 +169,13 @@ public class VRPlayer : MonoBehaviour {
     
     public void SetSceneAndCamera(ActiveSceneAndCamera activeSceneAndCamera) {
         var scene = activeSceneAndCamera.Scene;
-        Camera = activeSceneAndCamera.Camera;
+        camera = activeSceneAndCamera.Camera;
     
-        if (Camera) {
+        if (camera) {
             if (!ExcludedScenes.Contains(scene.name)) 
-                localPlayer = FindLocalPlayerFromCamera(Camera);
+                localPlayer = FindLocalPlayerFromCamera(camera);
             else 
                 localPlayer = null;
-
-            // if (LocalPlayer != null) 
-            //     firstPersonCharacter = LocalPlayer.GetComponent<Il2CppFirstPersonCharacter>();
             
             DisableMouseRotation();
         }
@@ -219,18 +203,18 @@ public class VRPlayer : MonoBehaviour {
         {
             var movementController = localPlayer.GetComponent<PlayerMove>();
             if (movementController)
-                movementController.enabled = false;
+                movementController.stopMouseMove = true;
         }
     }
     
     private void OnDestroy() {
-        // onSceneLoaded -= new Action<Scene, LoadSceneMode>(OnSceneLoaded);
+        // onSceneLoaded -= OnSceneLoaded;
         if (Instance == this)
             Instance = null;
     }
     
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-        // Intentionally empty
+        // empty
     }
     
     private void OnEnable() {

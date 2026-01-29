@@ -4,10 +4,10 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using Valve.VR;
 
-namespace MiSide_VR.VR;
+namespace MiSide_VR.VRInput;
 
-public class HandController : MonoBehaviour {
-    public HandController(IntPtr value) : base(value) { }
+public class ControllerTracking : MonoBehaviour {
+    public ControllerTracking(IntPtr value) : base(value) { }
 
     public HandType controllerHandType;
     public Transform model;
@@ -57,7 +57,7 @@ public class HandController : MonoBehaviour {
         eventCamera.cullingMask = 1 << LayerMask.NameToLayer("UI");
         
         pose = transform.gameObject.GetOrAddComponent<SteamVR_Behaviour_Pose>();
-        pose.poseAction = SteamVR_Actions.MiSide.Pose;
+        pose.poseAction = SteamVR_Actions.Gameplay.Pose;
         pose.inputSource = (controllerHandType == HandType.Left) ? SteamVR_Input_Sources.LeftHand : SteamVR_Input_Sources.RightHand;
         pose.origin = transform.parent;
     }

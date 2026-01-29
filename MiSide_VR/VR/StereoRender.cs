@@ -8,7 +8,7 @@ namespace MiSide_VR.VR;
 public class StereoRender : MonoBehaviour {
     public StereoRender(IntPtr value) : base(value) { }
 
-    private static StereoRender _instance;
+    public static StereoRender Instance { get; private set; }
     
     public Transform head;
     public Camera headCamera;
@@ -17,8 +17,8 @@ public class StereoRender : MonoBehaviour {
     public Camera leftCamera, rightCamera;
     public RenderTexture leftRT, rightRT;
     
-    private const float ClipStart = 0.1f;
-    private const float ClipEnd = 1000f;
+    private const float ClipStart = 0.015f;
+    private const float ClipEnd = 240000;
     public const int DefaultCullingMask = -1;
     
     private int _currentWidth, _currentHeight;
@@ -31,19 +31,18 @@ public class StereoRender : MonoBehaviour {
     public void Awake() {
         Log.LogInfo("[StereoRender] StereoRender Created.");
         
-        if (_instance) {
+        if (Instance) {
             Log.LogWarning("[StereoRender] Duplicate StereoRender detected, destroying duplicate.");
             Destroy(gameObject);
             return;
         }
-        _instance = this;
+        Instance = this;
         
         Setup();
     }
     
     public void Setup() {
         Log.LogInfo("[StereoRender] Initializing StereoRender...");
-        int mirrorLayer = LayerMask.NameToLayer("ForMirror");
 
         // Create or find the HMD transform
         head = transform.Find("Head");
@@ -65,7 +64,6 @@ public class StereoRender : MonoBehaviour {
         headCamera.farClipPlane = ClipEnd;
         headCamera.fieldOfView = 109.363f; 
         headCamera.depth = 0;
-        headCamera.cullingMask &= ~(1 << mirrorLayer);
         
         // --- LEFT EYE ---
         var leftEye = head.Find("LeftEye");
@@ -85,7 +83,6 @@ public class StereoRender : MonoBehaviour {
         leftCamera.fieldOfView = 109.363f;
         leftCamera.depth = 0;
         leftCamera.enabled = true;
-        leftCamera.cullingMask &= ~(1 << mirrorLayer);
 
         // --- RIGHT EYE ---
         var rightEye = head.Find("RightEye");
@@ -105,7 +102,6 @@ public class StereoRender : MonoBehaviour {
         rightCamera.fieldOfView = 109.363f;
         rightCamera.depth = 0;
         rightCamera.enabled = true;
-        rightCamera.cullingMask &= ~(1 << mirrorLayer);
 
         // Apply projection matrices from SteamVR (non-linear, per-eye)
         UpdateProjectionMatrix();
@@ -165,8 +161,8 @@ public class StereoRender : MonoBehaviour {
     }
     
     public void OnDestroy() {
-        if (_instance == this)
-            _instance = null;
+        if (Instance == this)
+            Instance = null;
     }
     
     public class StereoRenderPass(StereoRender stereoRender) {

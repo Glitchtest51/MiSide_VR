@@ -1,116 +1,70 @@
 {
   "actions": [
     {
-      "name": "/actions/MiSide/in/InteractUI",
-      "type": "boolean"
+      "name": "/actions/Gameplay/in/Pose",
+      "type": "pose",
+      "requirement": "mandatory"
     },
     {
-      "name": "/actions/MiSide/in/Pose",
-      "type": "pose"
-    },
-    {
-      "name": "/actions/MiSide/in/SkeletonLeftHand",
+      "name": "/actions/Gameplay/in/SkeletonLeftHand",
       "type": "skeleton",
       "skeleton": "/skeleton/hand/left"
     },
     {
-      "name": "/actions/MiSide/in/SkeletonRightHand",
+      "name": "/actions/Gameplay/in/SkeletonRightHand",
       "type": "skeleton",
       "skeleton": "/skeleton/hand/right"
     },
     {
-      "name": "/actions/MiSide/in/SnapTurnLeft",
+      "name": "/actions/Gameplay/in/SnapTurnLeft",
+      "type": "boolean",
+      "requirement": "suggested"
+    },
+    {
+      "name": "/actions/Gameplay/in/SnapTurnRight",
       "type": "boolean"
     },
     {
-      "name": "/actions/MiSide/in/SnapTurnRight",
+      "name": "/actions/Gameplay/in/Move",
+      "type": "vector2",
+      "requirement": "mandatory"
+    },
+    {
+      "name": "/actions/Gameplay/in/Turn",
+      "type": "vector2",
+      "requirement": "mandatory"
+    },
+    {
+      "name": "/actions/Gameplay/in/Interact",
+      "type": "boolean",
+      "requirement": "mandatory"
+    },
+    {
+      "name": "/actions/Gameplay/in/Menu",
+      "type": "boolean",
+      "requirement": "mandatory"
+    },
+    {
+      "name": "/actions/Gameplay/in/GrabLeft",
       "type": "boolean"
     },
     {
-      "name": "/actions/MiSide/in/HeadsetOnHead",
+      "name": "/actions/Gameplay/in/GrabRight",
       "type": "boolean"
     },
     {
-      "name": "/actions/MiSide/in/WSAD_Move",
-      "type": "vector2"
-    },
-    {
-      "name": "/actions/MiSide/in/Shift_Run",
+      "name": "/actions/Gameplay/in/Sprint",
       "type": "boolean"
     },
     {
-      "name": "/actions/MiSide/in/MouseLeftLick",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/E_Interact",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/Q_Command",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/Space_Jump",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/Enter",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/ESC_Menu",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/MouseMove_Rotate",
-      "type": "vector2"
-    },
-    {
-      "name": "/actions/MiSide/in/LeftArrow",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/RightArrow",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/UpArrow",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/DownArrow",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/Hold_PinUI",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/ToggleVRIK",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/Grab_Left",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/in/Grab_Right",
-      "type": "boolean"
-    },
-    {
-      "name": "/actions/MiSide/out/HapticLeft",
-      "type": "vibration"
-    },
-    {
-      "name": "/actions/MiSide/out/HapticRight",
+      "name": "/actions/Gameplay/out/Haptic",
       "type": "vibration"
     }
   ],
   "action_sets": [
     {
-      "name": "/actions/MiSide",
-      "usage": "leftright"
+      "name": "/actions/Gameplay",
+      "usage": "single"
     }
   ],
   "default_bindings": [
@@ -125,14 +79,51 @@
     {
       "controller_type": "knuckles",
       "binding_url": "bindings_knuckles.json"
+    },
+    {
+      "controller_type": "holographic_controller",
+      "binding_url": "bindings_holographic_controller.json"
+    },
+    {
+      "controller_type": "vive_cosmos_controller",
+      "binding_url": "bindings_vive_cosmos_controller.json"
+    },
+    {
+      "controller_type": "logitech_stylus",
+      "binding_url": "bindings_logitech_stylus.json"
+    },
+    {
+      "controller_type": "vive_cosmos",
+      "binding_url": "binding_vive_cosmos.json"
+    },
+    {
+      "controller_type": "vive",
+      "binding_url": "binding_vive.json"
+    },
+    {
+      "controller_type": "indexhmd",
+      "binding_url": "binding_index_hmd.json"
+    },
+    {
+      "controller_type": "vive_pro",
+      "binding_url": "binding_vive_pro.json"
+    },
+    {
+      "controller_type": "rift",
+      "binding_url": "binding_rift.json"
+    },
+    {
+      "controller_type": "holographic_hmd",
+      "binding_url": "binding_holographic_hmd.json"
+    },
+    {
+      "controller_type": "vive_tracker_camera",
+      "binding_url": "binding_vive_tracker_camera.json"
     }
   ],
   "localization": [
     {
-      "language_tag": "en_US",
-      "/actions/MiSide": "MiSide VR Actions",
-      "/actions/MiSide/in/Pose": "Controller Pose",
-      "/actions/MiSide/in/InteractUI": "Interact with UI"
+      "language_tag": "en_US"
     }
   ]
 }

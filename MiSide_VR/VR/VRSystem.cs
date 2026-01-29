@@ -70,10 +70,13 @@ public class VRSystem : MonoBehaviour {
         } else Log.LogInfo($"[VRSystem] No active camera found in scene: {activeScene.name}");
     }
     
-    private void CopyCameraData(Camera source, Camera target)
-    {
+    private void CopyCameraData(Camera source, Camera target) {
         if (!source || !target)
             return;
+        
+        var mirrorLayer = LayerMask.NameToLayer("ForMirror");
+        var playerLayer = LayerMask.NameToLayer("Player");
+        var uiLayer = LayerMask.NameToLayer("UI");
         
         target.clearFlags = source.clearFlags;
         target.backgroundColor = source.backgroundColor;
@@ -87,6 +90,12 @@ public class VRSystem : MonoBehaviour {
         target.renderingPath = source.renderingPath;
         target.allowHDR = source.allowHDR;
         target.allowMSAA = source.allowMSAA;
+        if ((target.cullingMask & (1 << mirrorLayer)) != 0) 
+            target.cullingMask &= ~(1 << mirrorLayer);
+        if ((target.cullingMask & (1 << playerLayer)) == 0) 
+            target.cullingMask |= 1 << playerLayer;
+        if ((target.cullingMask & (1 << uiLayer)) == 0) 
+            target.cullingMask |= 1 << uiLayer;
         
         var sourcePpLayer = source.GetComponent<PostProcessLayer>();
         if (!sourcePpLayer) {
