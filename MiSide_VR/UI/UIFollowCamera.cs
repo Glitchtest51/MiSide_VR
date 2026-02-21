@@ -1,94 +1,43 @@
 ﻿using System;
-using System.Collections.Generic;
-using MiSide_VR.VR;
+using MiSide_VR.Core;
 using UnityEngine;
 
 namespace MiSide_VR.UI;
 
-public class UIFollowCamera : MonoBehaviour {
-    public UIFollowCamera(IntPtr value) : base(value) { }
-    
-    private Camera _vrCamera;
-    private bool _shouldFollowCamera = true;
-    private bool _isInitialized;
-    private bool _needsInitialSnap;
-    
-    private const float UIDistance = 1f;
-    private const float SmoothSpeed = 10f;
+public class UIFollowCamera: MonoBehaviour {
+	public UIFollowCamera(IntPtr value): base(value) { }
 
-    private void Awake() {
-        CacheCamera();
-        DetermineFollowBehavior();
-    }
+	private Camera _vrCamera;
+	private bool _isInitialized;
 
-    private void Start() {
-        if (!_isInitialized) {
-            CacheCamera();
-            DetermineFollowBehavior();
-        }
-    }
+	private const float UIDistance = 1f;
+	private const float SmoothSpeed = 10f;
 
-    private void LateUpdate() {
-        if (!_shouldFollowCamera) return;
-        if (!_vrCamera) CacheCamera();
-        if (!_vrCamera) return;
-        
-        if (_needsInitialSnap) {
-            transform.position = _vrCamera.transform.position + _vrCamera.transform.forward * UIDistance;
-            transform.rotation = _vrCamera.transform.rotation;
-            _needsInitialSnap = false;
-            return;
-        }
+	private void Awake() {
+		Initialize();
+	}
 
-        var targetPosition = _vrCamera.transform.position + _vrCamera.transform.forward * UIDistance;
-        var targetRotation = _vrCamera.transform.rotation;
+	private void Start() {
+		if (!_isInitialized) {
+			Initialize();
+		}
+	}
 
-        transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * SmoothSpeed);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * SmoothSpeed);
-    }
+	private void LateUpdate() {
+		Initialize();
+		if (!_vrCamera) return;
 
-    private void OnEnable() {
-        _needsInitialSnap = true;
-    }
+		var targetPosition = _vrCamera.transform.position + _vrCamera.transform.forward * UIDistance;
+		var targetRotation = _vrCamera.transform.rotation;
 
-    private void CacheCamera() {
-        if (!_vrCamera) {
-            _vrCamera = VRPlayer.Instance.StereoRender.headCamera;
-            _isInitialized = _vrCamera;
-        }
-    }
-
-    private void DetermineFollowBehavior() {
-        var canvasName = gameObject.name;
-        
-        if (IsWorldLockedUI(canvasName)) 
-            _shouldFollowCamera = false;
-    }
-    
-
-    private static bool IsWorldLockedUI(string canvasName)
-    {
-        if (WorldLockedUINames.Contains(canvasName))
-            return true;
-        
-        foreach (string keyword in WorldLockedKeywords) {
-            if (canvasName.Contains(keyword))
-                return true;
-        }
-
-        return false;
-    }
-    
-    private static readonly HashSet<string> WorldLockedUINames = [
-        // "GlitchTerminalActivatorUI_Ammo(Clone)",
-        // "ExchangeOfflineUI(Clone)",
-        // "DeathObscurer",
-        // "KnockedOutUI(Clone)"
-    ];
-
-    // Keywords that indicate world-locked UI
-    private static readonly string[] WorldLockedKeywords = [
-        // "Activate",
-        // "Popup"
-    ];
-}
+		transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * SmoothSpeed);
+		transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * SmoothSpeed);
+	}
+	
+	private void Initialize () {
+		if (!_vrCamera && VRPlayer.Instance && VRPlayer.Instance.StereoRender) {
+			_vrCamera = VRPlayer.Instance.StereoRender.headCamera;
+			_isInitialized = _vrCamera;
+		}
+	}
+} 
