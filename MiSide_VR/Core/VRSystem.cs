@@ -76,8 +76,14 @@ public class VRSystem: MonoBehaviour {
 				if (!stereoRender) return;
 
 				CopyCameraData(activeCamera, stereoRender.headCamera);
-				CopyCameraData(activeCamera, stereoRender.leftCamera);
-				CopyCameraData(activeCamera, stereoRender.rightCamera);
+				CopyCameraData(activeCamera, stereoRender.leftMainCamera);
+				CopyCameraData(activeCamera, stereoRender.rightMainCamera);
+
+				// var cameraPersons = activeCamera.transform.Find("CameraPersons")?.GetComponent<Camera>();
+				// if (cameraPersons) {
+				// 	CopyCameraData(cameraPersons, stereoRender.leftPersonsCamera);
+				// 	CopyCameraData(cameraPersons, stereoRender.rightPersonsCamera);
+				// }
 			} else if (VRPlayer.Instance)
 				VRPlayer.Instance.SetSceneAndCamera(sceneAndCamera);
 		} else Log.LogInfo($"[VRSystem] No active camera found in scene: {activeScene.name}");
@@ -138,38 +144,19 @@ public class VRSystem: MonoBehaviour {
 	private static void CopyCameraData(Camera source, Camera target) {
 		if (!source || !target)
 			return;
-
-		var mirrorLayer = LayerMask.NameToLayer("ForMirror");
-		var playerLayer = LayerMask.NameToLayer("Player");
-		var uiLayer = LayerMask.NameToLayer("UI");
-
-		target.clearFlags = source.clearFlags;
+		
 		target.backgroundColor = source.backgroundColor;
 		target.orthographic = source.orthographic;
 		target.orthographicSize = source.orthographicSize;
-		target.fieldOfView = source.fieldOfView;
-		target.nearClipPlane = source.nearClipPlane;
 		target.farClipPlane = source.farClipPlane;
-		target.cullingMask = source.cullingMask;
-		target.depth = source.depth;
 		target.renderingPath = source.renderingPath;
 		target.allowHDR = source.allowHDR;
 		target.allowMSAA = source.allowMSAA;
-
-		if ((target.cullingMask & (1 << mirrorLayer)) != 0)
-			target.cullingMask &= ~(1 << mirrorLayer);
-
-		if ((target.cullingMask & (1 << playerLayer)) == 0)
-			target.cullingMask |= 1 << playerLayer;
-
-		if ((target.cullingMask & (1 << uiLayer)) == 0)
-			target.cullingMask |= 1 << uiLayer;
 
 		var sourcePpLayer = source.GetComponent<PostProcessLayer>();
 
 		if (!sourcePpLayer) {
 			Log.LogWarning($"[VRSystem] No PostProcessLayer found in Camera: {source.name}, Tag: {source.tag}, Scene: {source.scene.name}.");
-
 			return;
 		}
 

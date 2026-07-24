@@ -45,7 +45,6 @@ class CanvasPatch {
 		}
 
 		if (!CachedEventSystem) SetupVREventSystem();
-
 		if (!CachedEventSystem) return;
 
 		ProcessedCanvases.Add(canvas);
@@ -56,12 +55,18 @@ class CanvasPatch {
 		if (canvas.renderMode == RenderMode.WorldSpace) return;
 
 		canvas.renderMode = RenderMode.WorldSpace;
+		
+		var rectTransform = canvas.GetComponent<RectTransform>();
+		if (rectTransform.rect.width > 0 && rectTransform.rect.height > 0 && !canvas.gameObject.GetComponent<BoxCollider>()) {
+			var collider = canvas.gameObject.AddComponent<BoxCollider>();
+			collider.size = new(rectTransform.rect.width, rectTransform.rect.height, 0.1f);
+		}
 
 		switch (canvas.gameObject.scene.name) {
 		    case "SceneAihasto":
 			    if (Camera.main != null) {
 				    Transform playerCamera = Camera.main.transform;
-				    canvas.transform.position = playerCamera.position + playerCamera.forward * 2f;
+				    canvas.transform.position = playerCamera.position + playerCamera.forward * 5f;
 				    canvas.transform.rotation = Quaternion.LookRotation(canvas.transform.position - playerCamera.position);
 				    canvas.transform.localScale = Vector3.one * 0.002f;
 			    }
@@ -69,7 +74,7 @@ class CanvasPatch {
 		    case "SceneLoading":
 			    if (Camera.main != null) {
 				    Transform playerCamera = Camera.main.transform;
-				    canvas.transform.position = playerCamera.position + playerCamera.forward * 2f;
+				    canvas.transform.position = playerCamera.position + playerCamera.forward * 5f;
 				    canvas.transform.rotation = Quaternion.LookRotation(canvas.transform.position - playerCamera.position);
 				    canvas.transform.localScale = Vector3.one * 0.002f;
 			    }
@@ -80,7 +85,8 @@ class CanvasPatch {
 		    //     canvas.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
 		    //     return;
 		}
-
+		
+		canvas.gameObject.layer = VRPlayer.VRUILayer;
 		canvas.transform.localScale = Vector3.one * 0.0005f;
 		canvas.gameObject.AddComponent<UIFollowCamera>();
 	}
@@ -104,8 +110,6 @@ class CanvasPatch {
 		var vrPointerInput = CachedEventSystem.GetOrAddComponent<VRPointerInput>();
 		vrPointerInput.eventCamera = hand.eventCamera;
 		inputModule.inputOverride = vrPointerInput;
-
-		hand.uiMode = true;
 	}
 
 	private static GameObject FindEventSystem() {

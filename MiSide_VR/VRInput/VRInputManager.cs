@@ -53,6 +53,8 @@ public static class VRInputManager {
 
 		AxisMap.Add("Horizontal", new("Move", AxisComponent.X));
 		AxisMap.Add("Vertical", new("Move", AxisComponent.Y));
+		AxisMap.Add("Mouse X", new("Pose", AxisComponent.X));
+		AxisMap.Add("Mouse Y", new("Pose", AxisComponent.Y));
 
 		MouseButtonMap.Add(0, "Interact");
 
@@ -152,9 +154,11 @@ public static class VRInputManager {
 
 	public static float GetMappedAxis(string axisName) {
 		if (!AxisMap.TryGetValue(axisName, out var mapping)) return 0f;
+		
+		if (axisName == "Mouse X") return GetHandVelocity("Pose").x * 0.01f;
+		if (axisName == "Mouse Y") return GetHandVelocity("Pose").y * 0.01f;
 
 		var action = GetAction<SteamVR_Action_Vector2>(mapping.ActionName);
-
 		if (action == null) return 0f;
 
 		return mapping.Component == AxisComponent.X ? action.axis.x : action.axis.y;

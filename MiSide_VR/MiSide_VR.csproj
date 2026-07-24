@@ -377,6 +377,6 @@
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="xcopy &quot;$(TargetDir)\MiSide_VR.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\&quot; /Y /I&#xA;xcopy &quot;$(TargetDir)\SteamVR_Standalone_IL2CPP.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\&quot; /Y /I&#xA;&#xA;xcopy &quot;..\CopyToGame\Plugins\x86_64\*&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\UserLibs\&quot; /Y /E /H /C /I&#xA;&#xA;xcopy &quot;..\CopyToGame\*&quot; &quot;..\Build\MiSideFull_Data\&quot; /Y /E /H /C /I&#xA;&#xA;if &quot;$(Username)&quot; == &quot;Glitc&quot; xcopy &quot;..\Build\*&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\MiSide\&quot; /Y /E /H /C /I"/>
+        <Exec Command="xcopy &quot;$(TargetDir)\MiSide_VR.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\&quot; /Y /I&#xA;xcopy &quot;$(TargetDir)\SteamVR_Standalone_IL2CPP.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\&quot; /Y /I&#xA;&#xA;xcopy &quot;..\CopyToGame\Plugins\x86_64\*&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\UserLibs\&quot; /Y /E /H /C /I&#xA;&#xA;xcopy &quot;..\CopyToGame\*&quot; &quot;..\Build\MiSideFull_Data\&quot; /Y /E /H /C /I&#xA;&#xA;if &quot;$(Username)&quot; == &quot;Glitc&quot; xcopy &quot;..\Build\*&quot; &quot;D:\My-Stuff\Documents\Games\miside-modding\Game\MiSide-Bepinex\&quot; /Y /E /H /C /I"/>
     </Target>
 </Project>

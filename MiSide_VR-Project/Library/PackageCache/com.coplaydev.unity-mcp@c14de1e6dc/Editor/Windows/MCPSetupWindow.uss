@@ -1,0 +1,143 @@
+/* MCP Setup Window Styles */
+
+/* Root container */
+#root-container {
+    padding: 20px;
+    flex-grow: 1;
+}
+
+/* Header row (logo + title) */
+.setup-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.setup-logo {
+    width: 34px;
+    height: 34px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+/* In the header row the title reads as a plain heading beside the logo, not a boxed button. */
+.setup-header .title {
+    margin-bottom: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    flex-shrink: 1;
+    white-space: normal;
+}
+
+/* Dependency list */
+#dependency-list {
+    margin-top: 8px;
+}
+
+/* Dependency item container */
+.dependency-item {
+    margin-bottom: 12px;
+}
+
+/* Dependency row (name + version + indicator) */
+.dependency-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+/* Dependency name label */
+.dependency-name {
+    -unity-font-style: bold;
+    min-width: 150px;
+}
+
+/* Status indicator positioning */
+.dependency-row .status-indicator-small {
+    margin-left: 8px;
+}
+
+/* Dependency details text */
+.dependency-details {
+    margin-left: 0px;
+    margin-top: 4px;
+}
+
+/* Status message container */
+#status-message-container {
+    margin-top: 16px;
+}
+
+/* Status message text */
+#status-message {
+    white-space: normal;
+}
+
+/* Installation section */
+#installation-section {
+    margin-top: 16px;
+    padding: 12px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.2);
+    display: none;
+}
+
+.installation-container {
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+/* Installation section title */
+.installation-title {
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+
+/* Installation instructions text */
+#installation-instructions {
+    white-space: normal;
+    margin-bottom: 4px;
+}
+
+.install-links-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.install-link-button {
+    flex-grow: 1;
+    min-width: 180px;
+    margin-top: 0;
+}
+
+/* Button container at bottom — wraps rather than clipping when the window is narrowed. */
+.button-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+/* Button sizing — grow to fit the label (e.g. "Configure Selected") instead of clipping. */
+.setup-button {
+    min-width: 96px;
+    height: 28px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: 8px;
+    margin-top: 4px;
+}
+
+/* Footer buttons size to content and sit together on one row. The descendant selector
+   (higher specificity) beats .secondary-button's width:100% regardless of stylesheet order,
+   so Refresh no longer stretches full-width and overflows. */
+.button-container .setup-button {
+    width: auto;
+    flex-grow: 0;
+}
+
+/* Description text spacing */
+.description-text {
+    margin-bottom: 12px;
+}

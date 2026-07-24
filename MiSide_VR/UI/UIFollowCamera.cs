@@ -12,6 +12,7 @@ public class UIFollowCamera: MonoBehaviour {
 
 	private const float UIDistance = 1f;
 	private const float SmoothSpeed = 10f;
+	private const float YawDeadzone = 15f;
 
 	private void Awake() {
 		Initialize();
@@ -26,12 +27,16 @@ public class UIFollowCamera: MonoBehaviour {
 	private void LateUpdate() {
 		Initialize();
 		if (!_vrCamera) return;
-
-		var targetPosition = _vrCamera.transform.position + _vrCamera.transform.forward * UIDistance;
-		var targetRotation = _vrCamera.transform.rotation;
-
+		
+		Vector3 targetPosition = _vrCamera.transform.position + _vrCamera.transform.forward * UIDistance;
 		transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * SmoothSpeed);
-		transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * SmoothSpeed);
+		
+		float cameraYaw = _vrCamera.transform.eulerAngles.y;
+		float hudYaw = transform.eulerAngles.y;
+		float yawDelta = Mathf.DeltaAngle(hudYaw, cameraYaw);
+		
+		if (Mathf.Abs(yawDelta) > YawDeadzone) 
+			transform.rotation = Quaternion.Euler(0f, Mathf.LerpAngle(hudYaw, cameraYaw, Time.deltaTime * SmoothSpeed), 0f);
 	}
 	
 	private void Initialize () {

@@ -16,12 +16,14 @@ public class StereoRender: MonoBehaviour {
 	public Camera headCamera;
 
 	private const float Separation = 0.064f;
-	public Camera leftCamera, rightCamera;
+	public Camera leftMainCamera, rightMainCamera;
+	// public Camera leftPersonsCamera, rightPersonsCamera;
+	public Camera leftUICamera, rightUICamera;
 	public RenderTexture leftRT, rightRT;
-
+	
+	private const int CullingMask  = 80453 | 416;
 	private const float ClipStart = 0.015f;
-	private const float ClipEnd = 240000;
-	public const int DefaultCullingMask = -1;
+	private const float FOV = 109.363f;
 
 	private int _currentWidth, _currentHeight;
 
@@ -46,84 +48,147 @@ public class StereoRender: MonoBehaviour {
 	public void Setup() {
 		Log.LogInfo("[StereoRender] Initializing StereoRender...");
 		
+		// Head
 		head = transform.Find("Head");
-
-		if (!head)
-			head = new GameObject("Head").transform;
+		if (!head) head = new GameObject("Head").transform;
+		
 		head.SetParent(transform, false);
 		head.localPosition = Vector3.zero;
 		head.localRotation = Quaternion.identity;
-		
 		head.gameObject.GetOrAddComponent<SteamVR_TrackedObject>().index = SteamVR_TrackedObject.EIndex.Hmd;
-
-		// --- Head Camera ---
+		
 		headCamera = head.gameObject.GetOrAddComponent<Camera>();
 		headCamera.enabled = false;
-		headCamera.cullingMask = DefaultCullingMask;
-		headCamera.clearFlags = CameraClearFlags.Skybox;
+		headCamera.clearFlags = CameraClearFlags.SolidColor;
 		headCamera.nearClipPlane = ClipStart;
-		headCamera.farClipPlane = ClipEnd;
-		headCamera.fieldOfView = 109.363f;
+		headCamera.fieldOfView = FOV;
 		headCamera.depth = 0;
 
-		// --- LEFT EYE ---
+		// Left Eye
 		var leftEye = head.Find("LeftEye");
-
-		if (!leftEye)
-			leftEye = new GameObject("LeftEye").transform;
+		if (!leftEye) leftEye = new GameObject("LeftEye").transform;
 
 		leftEye.SetParent(head, false);
-		leftEye.localPosition = new Vector3(-Separation * 0.5f, 0, 0);
+		leftEye.localPosition = new (-Separation * 0.5f, 0, 0);
 		leftEye.localRotation = Quaternion.identity;
+		
+		leftMainCamera = leftEye.gameObject.GetOrAddComponent<Camera>();
+		leftMainCamera.enabled = true;
+		leftMainCamera.stereoTargetEye = StereoTargetEyeMask.None;
+		leftMainCamera.clearFlags = CameraClearFlags.SolidColor;
+		leftMainCamera.nearClipPlane = ClipStart;
+		leftMainCamera.fieldOfView = FOV;
+		leftMainCamera.depth = -1;
+		leftMainCamera.cullingMask = CullingMask;
+		
+		// var leftPersonsObject = leftEye.Find("LeftPersonsEye");
+		// if (!leftPersonsObject) leftPersonsObject = new GameObject("LeftPersonsEye").transform;
+		//
+		// leftPersonsObject.SetParent(leftEye, false);
+		// leftPersonsObject.localPosition = Vector3.zero;
+		// leftPersonsObject.localRotation = Quaternion.identity;
+		//
+		// leftPersonsCamera = leftPersonsObject.gameObject.GetOrAddComponent<Camera>();
+		// leftPersonsCamera.enabled = true;
+		// leftPersonsCamera.stereoTargetEye = StereoTargetEyeMask.None;
+		// leftPersonsCamera.clearFlags = CameraClearFlags.Nothing;
+		// leftPersonsCamera.nearClipPlane = ClipStart;
+		// leftPersonsCamera.fieldOfView = FOV;
+		// leftPersonsCamera.depth = 1;
+		// leftPersonsCamera.cullingMask = 416;
+		
+		var leftUIObject = leftEye.Find("LeftUIEye");
+		if (!leftUIObject) leftUIObject = new GameObject("LeftUIEye").transform;
 
-		leftCamera = leftEye.gameObject.GetOrAddComponent<Camera>();
-		leftCamera.cullingMask = DefaultCullingMask;
-		leftCamera.stereoTargetEye = StereoTargetEyeMask.None;
-		leftCamera.clearFlags = CameraClearFlags.Skybox;
-		leftCamera.nearClipPlane = ClipStart;
-		leftCamera.farClipPlane = ClipEnd;
-		leftCamera.fieldOfView = 109.363f;
-		leftCamera.depth = 0;
-		leftCamera.enabled = true;
+		leftUIObject.SetParent(leftEye, false);
+		leftUIObject.localPosition = Vector3.zero;
+		leftUIObject.localRotation = Quaternion.identity;
+		
+		leftUICamera = leftUIObject.gameObject.GetOrAddComponent<Camera>();
+		leftUICamera.enabled = true;
+		leftUICamera.stereoTargetEye = StereoTargetEyeMask.None;
+		leftUICamera.clearFlags = CameraClearFlags.Depth;
+		leftUICamera.nearClipPlane = ClipStart;
+		leftUICamera.fieldOfView = FOV;
+		leftUICamera.depth = 2;
+		leftUICamera.farClipPlane = 100;
+		leftUICamera.cullingMask = 1 << VRPlayer.VRUILayer;
 
-		// --- RIGHT EYE ---
+		// Right Eye
 		var rightEye = head.Find("RightEye");
-
-		if (!rightEye)
-			rightEye = new GameObject("RightEye").transform;
+		if (!rightEye) rightEye = new GameObject("RightEye").transform;
 
 		rightEye.SetParent(head, false);
-		rightEye.localPosition = new Vector3(Separation * 0.5f, 0, 0); // Offset right
+		rightEye.localPosition = new (Separation * 0.5f, 0, 0);
 		rightEye.localRotation = Quaternion.identity;
 
-		rightCamera = rightEye.gameObject.GetOrAddComponent<Camera>();
-		rightCamera.cullingMask = DefaultCullingMask;
-		rightCamera.stereoTargetEye = StereoTargetEyeMask.None;
-		rightCamera.clearFlags = CameraClearFlags.Skybox;
-		rightCamera.nearClipPlane = ClipStart;
-		rightCamera.farClipPlane = ClipEnd;
-		rightCamera.fieldOfView = 109.363f;
-		rightCamera.depth = 0;
-		rightCamera.enabled = true;
+		rightMainCamera = rightEye.gameObject.GetOrAddComponent<Camera>();
+		rightMainCamera.enabled = true;
+		rightMainCamera.stereoTargetEye = StereoTargetEyeMask.None;
+		rightMainCamera.clearFlags = CameraClearFlags.SolidColor;
+		rightMainCamera.nearClipPlane = ClipStart;
+		rightMainCamera.fieldOfView = FOV;
+		rightMainCamera.depth = -1;
+		rightMainCamera.cullingMask = CullingMask;
+		
+		// var rightPersonsObject = rightEye.Find("RightPersonsEye");
+		// if (!rightPersonsObject) rightPersonsObject = new GameObject("RightPersonsEye").transform;
+		//
+		// rightPersonsObject.SetParent(rightEye, false);
+		// rightPersonsObject.localPosition = Vector3.zero;
+		// rightPersonsObject.localRotation = Quaternion.identity;
+		//
+		// rightPersonsCamera = rightPersonsObject.gameObject.GetOrAddComponent<Camera>();
+		// rightPersonsCamera.enabled = true;
+		// rightPersonsCamera.stereoTargetEye = StereoTargetEyeMask.None;
+		// rightPersonsCamera.clearFlags = CameraClearFlags.Nothing;
+		// rightPersonsCamera.nearClipPlane = ClipStart;
+		// rightPersonsCamera.fieldOfView = FOV;
+		// rightPersonsCamera.depth = 1;
+		// rightPersonsCamera.cullingMask = 416;
+		
+		var rightUIObject = rightEye.Find("RightUIEye");
+		if (!rightUIObject) rightUIObject = new GameObject("RightUIEye").transform;
 
+		rightUIObject.SetParent(rightEye, false);
+		rightUIObject.localPosition = Vector3.zero;
+		rightUIObject.localRotation = Quaternion.identity;
+		
+		rightUICamera = rightUIObject.gameObject.GetOrAddComponent<Camera>();
+		rightUICamera.enabled = true;
+		rightUICamera.stereoTargetEye = StereoTargetEyeMask.None;
+		rightUICamera.clearFlags = CameraClearFlags.Depth;
+		rightUICamera.nearClipPlane = ClipStart;
+		rightUICamera.fieldOfView = FOV;
+		rightUICamera.depth = 2;
+		rightUICamera.farClipPlane = 100;
+		rightUICamera.cullingMask = 1 << VRPlayer.VRUILayer;
+		
 		// Apply projection matrices from SteamVR (non-linear, per-eye)
 		UpdateProjectionMatrix();
-
+		
 		// Allocate render textures at recommended resolution
 		UpdateResolution();
 
 		// Initialize the OpenVR submission pass
-		stereoRenderPass = new StereoRenderPass(this);
+		stereoRenderPass = new (this);
 
 		Log.LogInfo("[StereoRender] StereoRender Initialized.");
 	}
 
 	public void UpdateProjectionMatrix() {
-		var leftProj = OpenVR.System.GetProjectionMatrix(EVREye.Eye_Left, ClipStart, ClipEnd);
-		var rightProj = OpenVR.System.GetProjectionMatrix(EVREye.Eye_Right, ClipStart, ClipEnd);
+		var leftProj = OpenVR.System.GetProjectionMatrix(EVREye.Eye_Left, ClipStart, 25000);
+		var rightProj = OpenVR.System.GetProjectionMatrix(EVREye.Eye_Right, ClipStart, 25000);
 
-		leftCamera.projectionMatrix = leftProj.ConvertToMatrix4X4();
-		rightCamera.projectionMatrix = rightProj.ConvertToMatrix4X4();
+		var leftMat = leftProj.ConvertToMatrix4X4();
+		var rightMat = rightProj.ConvertToMatrix4X4();
+
+		leftMainCamera.projectionMatrix = leftMat;
+		// leftPersonsCamera.projectionMatrix = leftMat;
+		leftUICamera.projectionMatrix = leftMat;
+		rightMainCamera.projectionMatrix = rightMat;
+		// rightPersonsCamera.projectionMatrix = rightMat;
+		rightUICamera.projectionMatrix = rightMat;
 	}
 
 	public void UpdateResolution() {
@@ -140,8 +205,12 @@ public class StereoRender: MonoBehaviour {
 		rightRT = new(_currentWidth, _currentHeight, 24, RenderTextureFormat.ARGB32) {antiAliasing = 2};
 
 		// Assign as render targets
-		leftCamera.targetTexture = leftRT;
-		rightCamera.targetTexture = rightRT;
+		leftMainCamera.targetTexture = leftRT;
+		// leftPersonsCamera.targetTexture = leftRT;
+		leftUICamera.targetTexture = leftRT;
+		rightMainCamera.targetTexture = rightRT;
+		// rightPersonsCamera.targetTexture = rightRT;
+		rightUICamera.targetTexture = rightRT;
 	}
 
 	public void FixedUpdate() {
@@ -193,10 +262,11 @@ public class StereoRender: MonoBehaviour {
 				vMax = 0
 			};
 			
+			
+			var errorL = OpenVR.Compositor.Submit(EVREye.Eye_Left, ref leftTex, ref textureBounds, EVRSubmitFlags.Submit_Default);
+			var errorR = OpenVR.Compositor.Submit(EVREye.Eye_Right, ref rightTex, ref textureBounds, EVRSubmitFlags.Submit_Default);
+			
 			if (DebugMode) {
-				var errorL = OpenVR.Compositor.Submit(EVREye.Eye_Left, ref leftTex, ref textureBounds, EVRSubmitFlags.Submit_Default);
-				var errorR = OpenVR.Compositor.Submit(EVREye.Eye_Right, ref rightTex, ref textureBounds, EVRSubmitFlags.Submit_Default);
-				
 				if (errorL != EVRCompositorError.None) Log.LogWarning($"Left eye submit error: {errorL}");
 				if (errorR != EVRCompositorError.None) Log.LogWarning($"Right eye submit error: {errorR}");
 			}

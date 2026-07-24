@@ -40,11 +40,11 @@ public class Plugin: BasePlugin {
 	public override void Load() {
 		Log = base.Log;
 		Log.LogInfo($"Loading {MyPluginInfo.PLUGIN_GUID} v{PLUGIN_VERSION}...");
-
-		if (OpenVR.IsRuntimeInstalled() && OpenVR.IsHmdPresent()) {
+		
+		try {
 			InitVR();
-		} else {
-			Log.LogWarning($"SteamVR is not open! Plugin {MyPluginInfo.PLUGIN_GUID} will not initialize!");
+		} catch (Exception ex) {
+			Log.LogError($"InitVR Crashed: {ex}");
 		}
 	}
 
@@ -58,6 +58,13 @@ public class Plugin: BasePlugin {
 			return;
 		}
 
+		if (!OpenVR.IsRuntimeInstalled() || !OpenVR.IsHmdPresent())
+		{
+			Log.LogWarning($"SteamVR is not open! Plugin {MyPluginInfo.PLUGIN_GUID} will not initialize!");
+			VREnabled = false;
+			return;
+		}
+		
 		SetupIL2CPPClassInjections();
 
 		try {
@@ -81,8 +88,11 @@ public class Plugin: BasePlugin {
 		if (!VREnabled) return;
 		var harmony = new Harmony(PLUGIN_GUID);
 		harmony.PatchAll(Assembly.GetExecutingAssembly());
+		
 		VRInputManager.Initialize();
+		
 		SceneManager.sceneLoaded += new Action<Scene, LoadSceneMode>(OnSceneLoaded);
+		
 		Log.LogInfo("VR initialized.");
 	}
 	
@@ -124,11 +134,11 @@ public class Plugin: BasePlugin {
 
 		IntPtr result = LoadLibrary(dll);
 
-		if (DebugMode) Log.LogDebug($"Load {dll} result: {result}");
+		if (DebugMode) 
+			Log.LogDebug($"Load {dll} result: {result}");
 
 		if (result == IntPtr.Zero) {
 			Log.LogError($"Failed to load library, Win32 Error: {Marshal.GetLastWin32Error()}, result: {result}");
-
 			return false;
 		}
 
@@ -145,14 +155,10 @@ public class Plugin: BasePlugin {
 
 public static class Utils {
 	public static T GetOrAddComponent<T>(this GameObject gameObject) where T: Component {
-		if (!gameObject)
-			throw new ArgumentNullException(nameof(gameObject));
+		if (!gameObject) throw new ArgumentNullException(nameof(gameObject));
 
 		var comp = gameObject.GetComponent<T>();
-
-		if (!comp)
-			comp = gameObject.AddComponent<T>();
-
+		if (!comp) comp = gameObject.AddComponent<T>();
 		return comp;
 	}
 

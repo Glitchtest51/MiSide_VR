@@ -22,6 +22,7 @@ public class VRPlayer: MonoBehaviour {
 	public PlayerMove playerMove;
 	public Camera camera;
 	public Vector3 positionOffset = new(0.0f, 0.0f, 0.0f);
+	public static int VRUILayer = 17;
 
 	private bool _snapTurnReset = true;
 	private const float SnapAngle = 30f;
@@ -85,16 +86,16 @@ public class VRPlayer: MonoBehaviour {
 			if (!localPlayer)
 				Body.rotation = Quaternion.Euler(0f, camera.transform.eulerAngles.y, 0f);
 		}
-		
+
 		if (playerMove) {
 			if (Body) Body.rotation = Quaternion.Euler(0f, playerMove.transform.eulerAngles.y, 0f);
-			
+
 			Vector2 rightStick = VRInputManager.GetThumbstick("Turn");
-			
+
 			if (Mathf.Abs(rightStick.x) > StickThreshold) {
 				if (_snapTurnReset) {
 					float direction = (rightStick.x > 0) ? SnapAngle : -SnapAngle;
-					
+
 					float currentRotation = localPlayer.transform.eulerAngles.y;
 					float newRotation = currentRotation + direction;
 
@@ -105,10 +106,13 @@ public class VRPlayer: MonoBehaviour {
 			} else if (Mathf.Abs(rightStick.x) < 0.2f) {
 				_snapTurnReset = true;
 			}
-			
+
 			VRController hand = VRInputManager.GetHand();
-			bool didHit = Physics.SphereCast(hand.AimRay.origin, 0.025f, hand.AimRay.direction, out RaycastHit hit, 50.0f, playerMove.castHead);
-			if (didHit) playerMove.mainCamera.transform.LookAt(hit.point);
+
+			if (hand) {
+				bool didHit = Physics.SphereCast(hand.AimRay.origin, 0.025f, hand.AimRay.direction, out RaycastHit hit, 50.0f, playerMove.castHead);
+				if (didHit) playerMove.mainCamera.transform.LookAt(hit.point);
+			}
 		}
 	}
 

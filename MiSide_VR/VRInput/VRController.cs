@@ -1,5 +1,6 @@
 ﻿using System;
 using Il2CppSystem.Collections.Generic;
+using MiSide_VR.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Valve.VR;
@@ -19,7 +20,7 @@ public class VRController: MonoBehaviour {
 	public Camera eventCamera;
 	public EventSystem eventSystem;
 	public StandaloneInputModule inputModule;
-	public LayerMask rayCastMask = -967074285;
+	public LayerMask rayCastMask = LayerMask.GetMask("Default", "Mob", "Item");
 	public Shader savedLaserShader;
 
 	public bool uiMode;
@@ -32,11 +33,13 @@ public class VRController: MonoBehaviour {
 
 		var modelObj = new GameObject("Model");
 		modelObj.transform.SetParent(transform, false);
+		modelObj.layer = VRPlayer.VRUILayer;
 		modelObj.transform.localPosition = Vector3.zero;
 		model = modelObj.transform;
 
 		var muzzleObj = new GameObject("Muzzle");
 		muzzleObj.transform.SetParent(model, false);
+		muzzleObj.layer = VRPlayer.VRUILayer;
 		muzzleObj.transform.localPosition = Vector3.zero;
 		muzzleObj.transform.localRotation = Quaternion.identity;
 		muzzle = muzzleObj.transform;
@@ -89,11 +92,8 @@ public class VRController: MonoBehaviour {
 	}
 
 	public Vector3 GetRayHitPosition() {
-		if (uiMode) {
-			var canvasHit = GetCanvasHitEnd();
-
-			if (canvasHit != muzzle.position) return canvasHit;
-		}
+		var canvasHit = CalculateEnd(GetCanvasDistance());
+		if (canvasHit != muzzle.position) return canvasHit;
 
 		return GetRayHitPosition(300);
 	}
@@ -107,40 +107,36 @@ public class VRController: MonoBehaviour {
 		return ray.origin + (ray.direction * maxDistance);
 	}
 
-	private Vector3 GetCanvasHitEnd() {
-		var distance = GetCanvasDistance();
-
-		return CalculateEnd(distance);
-	}
-
 	private float GetCanvasDistance() {
-		if (!eventSystem || !inputModule || !inputModule.inputOverride)
-			return 0f;
+		// if (!eventSystem || !inputModule || !inputModule.inputOverride) return 0f;
+		//
+		// var eventData = new PointerEventData(eventSystem) {
+		// 	position = inputModule.inputOverride.mousePosition
+		// };
+		//
+		// var results = new List<RaycastResult>();
+		// eventSystem.RaycastAll(eventData, results);
+		//
+		// var closestResult = FindFirstRaycast(results);
+		// var distance = closestResult.distance;
+		//
+		// distance = Valve.VR.Mathf.Clamp(distance, 0.0f, 5);
+		//
+		// return distance;
+		var uiMask = (1 << LayerMask.NameToLayer("UI")) | (1 << VRPlayer.VRUILayer);
+		if (Physics.Raycast(AimRay, out RaycastHit hit, 5f, uiMask))
+			return hit.distance;
 
-		var eventData = new PointerEventData(eventSystem) {
-			position = inputModule.inputOverride.mousePosition
-		};
-
-		var results = new List<RaycastResult>();
-		eventSystem.RaycastAll(eventData, results);
-
-		var closestResult = FindFirstRaycast(results);
-		var distance = closestResult.distance;
-
-		distance = Valve.VR.Mathf.Clamp(distance, 0.0f, 5);
-
-		return distance;
+		return 0f;
 	}
 
 	private static RaycastResult FindFirstRaycast(List<RaycastResult> results) {
 		foreach (var result in results) {
-			if (!result.gameObject)
-				continue;
-
+			if (!result.gameObject) continue;
 			return result;
 		}
 
-		return new RaycastResult();
+		return new();
 	}
 
 	private Vector3 CalculateEnd(float length) {

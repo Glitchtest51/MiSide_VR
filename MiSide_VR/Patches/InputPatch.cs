@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using MiSide_VR.Core;
 using MiSide_VR.VRInput;
 using UnityEngine;
 
@@ -59,6 +60,25 @@ public static class InputPatch {
 	public static bool HkGetMouseButtonUp(int button, ref bool __result) {
 		__result = VRInputManager.GetMappedMouseButtonUp(button);
 
+		return false;
+	}
+	
+	[HarmonyPatch(typeof(Input), nameof(Input.mousePosition), MethodType.Getter)]
+	[HarmonyPrefix]
+	public static bool HkmousePosition(ref Vector3  __result) {
+		VRController hand = VRInputManager.GetHand();
+		if (!VRPlayer.Instance || !VRPlayer.Instance.camera || !hand) return true;
+
+		Vector3 worldPoint;
+		if (Physics.Raycast(new (hand.AimRay.origin, hand.AimRay.direction), out RaycastHit hit, 100f)) 
+			worldPoint = hit.point;
+		else 
+			worldPoint = hand.muzzle.position + hand.muzzle.forward * 10f;
+		
+		Vector3 screen = VRPlayer.Instance.camera.WorldToScreenPoint(worldPoint);
+		if (screen.z < 0f) return true;
+
+		__result = new (Mathf.Clamp(screen.x, 0f, Screen.width),  Mathf.Clamp(screen.y, 0f, Screen.height), 0f);
 		return false;
 	}
 }
