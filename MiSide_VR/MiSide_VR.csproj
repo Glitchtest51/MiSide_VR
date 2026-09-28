@@ -1,10 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <AssemblyName>MiSide_VR</AssemblyName>
         <Product>Plugin to make MiSide Playable in VR.</Product>
-        <Version>1.0.0</Version>
+        <Version>0.9.0</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <RestoreAdditionalProjectSources>
@@ -129,9 +128,6 @@
         </Reference>
         <Reference Include="NaughtyAttributes.Core">
             <HintPath>..\Libs\interop\NaughtyAttributes.Core.dll</HintPath>
-        </Reference>
-        <Reference Include="Newtonsoft.Json">
-            <HintPath>..\Libs\Dependencies\Newtonsoft.Json.dll</HintPath>
         </Reference>
         <Reference Include="SemanticVersioning">
             <HintPath>..\Libs\core\SemanticVersioning.dll</HintPath>
@@ -372,11 +368,7 @@
         </Reference>
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\SteamVR_Standalone_IL2CPP\SteamVR_Standalone_IL2CPP.csproj"/>
-    </ItemGroup>
-
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="xcopy &quot;$(TargetDir)\MiSide_VR.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\&quot; /Y /I&#xA;xcopy &quot;$(TargetDir)\SteamVR_Standalone_IL2CPP.dll&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\&quot; /Y /I&#xA;&#xA;xcopy &quot;..\CopyToGame\Plugins\x86_64\*&quot; &quot;..\Build\BepInEx\plugins\MiSide_VR\UserLibs\&quot; /Y /E /H /C /I&#xA;&#xA;xcopy &quot;..\CopyToGame\*&quot; &quot;..\Build\MiSideFull_Data\&quot; /Y /E /H /C /I&#xA;&#xA;if &quot;$(Username)&quot; == &quot;Glitc&quot; xcopy &quot;..\Build\*&quot; &quot;D:\My-Stuff\Documents\Games\miside-modding\Game\MiSide-Bepinex\&quot; /Y /E /H /C /I"/>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+      <Exec Command="xcopy &quot;$(TargetPath)&quot; &quot;$(SolutionDir)Build\BepInEx\plugins\MiSide_VR\&quot; /Y /I&#xA;xcopy &quot;$(SolutionDir)CopyToGame\*&quot; &quot;$(SolutionDir)Build\&quot; /Y /E /H /C /I&#xA;&#xA;if /I &quot;$(Username)&quot;==&quot;Glitc&quot; xcopy &quot;$(SolutionDir)Build\*&quot; &quot;D:\My-Stuff\Documents\Games\miside-modding\Game\MiSide-Bepinex\&quot; /Y /E /H /C /I&#xA;&#xA;powershell -NoProfile -Command &quot;New-Item -ItemType Directory -Force -Path '$(SolutionDir)Releases' | Out-Null; $zip = '$(SolutionDir)Releases\$(AssemblyName)-$(Version).zip'; if (Test-Path $zip) { Remove-Item $zip -Force }; Compress-Archive -Path '$(SolutionDir)Build\*' -DestinationPath $zip -Force&quot;" />
     </Target>
 </Project>

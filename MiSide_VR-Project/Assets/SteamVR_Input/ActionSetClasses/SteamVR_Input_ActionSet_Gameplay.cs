@@ -41,22 +41,6 @@ namespace Valve.VR
             }
         }
         
-        public virtual SteamVR_Action_Boolean SnapTurnLeft
-        {
-            get
-            {
-                return SteamVR_Actions.gameplay_SnapTurnLeft;
-            }
-        }
-        
-        public virtual SteamVR_Action_Boolean SnapTurnRight
-        {
-            get
-            {
-                return SteamVR_Actions.gameplay_SnapTurnRight;
-            }
-        }
-        
         public virtual SteamVR_Action_Vector2 Move
         {
             get
@@ -70,14 +54,6 @@ namespace Valve.VR
             get
             {
                 return SteamVR_Actions.gameplay_Turn;
-            }
-        }
-        
-        public virtual SteamVR_Action_Boolean Interact
-        {
-            get
-            {
-                return SteamVR_Actions.gameplay_Interact;
             }
         }
         
@@ -102,6 +78,30 @@ namespace Valve.VR
             get
             {
                 return SteamVR_Actions.gameplay_GrabRight;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean LeftTrigger
+        {
+            get
+            {
+                return SteamVR_Actions.gameplay_LeftTrigger;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean RightTrigger
+        {
+            get
+            {
+                return SteamVR_Actions.gameplay_RightTrigger;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean CalibrateHeight
+        {
+            get
+            {
+                return SteamVR_Actions.gameplay_CalibrateHeight;
             }
         }
         

@@ -1,187 +1,160 @@
-﻿using System;
-using MiSide_VR.VRInput;
+using System;
+using MiSide_VR.Core.Rendering;
+using MiSide_VR.Input;
+using MiSide_VR.Input.Patches;
+using MiSide_VR.UI;
+using MiSide_VR.UI.Patches;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 using static MiSide_VR.Plugin;
 
 namespace MiSide_VR.Core;
 
-public class VRSystem: MonoBehaviour {
-	public VRSystem(IntPtr value): base(value) { }
+public sealed class VRSystem : MonoBehaviour {
+	public VRSystem(IntPtr value) : base(value) {}
 
 	public static VRSystem Instance { get; private set; }
-	
-	public struct SceneAndCamera {
-		public Scene Scene;
-		public Camera Camera;
-	}
-	
-	private int _frameCounter;
-	
-	private SceneAndCamera _lastSceneAndCamera;
 
-	private bool _vrPlayerCreated;
+	private readonly CameraEffectMirror _cameraEffects = new();
+	private VRRendering _vrRendering;
+	private Camera _lastSourceCamera;
+	private Camera _lastOverlayCamera;
+	private GameMode _lastMode = GameMode.Unsupported;
+	private int _effectRefreshCounter;
+	private int _contextRefreshCounter;
+	private bool _startupAttempted;
 
 	private void Awake() {
-		Log.LogInfo("[VRSystem] VRSystem Created.");
-
+		Log.LogInfo("[VRSystem] Created.");
 		if (Instance) {
-			Log.LogWarning("[VRSystem] Duplicate VRSystem detected, destroying duplicate.");
+			Log.LogWarning("[VRSystem] Duplicate system destroyed.");
 			Destroy(gameObject);
-
 			return;
 		}
 
 		Instance = this;
 		DontDestroyOnLoad(gameObject);
+		SceneLoaded += OnSceneLoaded;
 
-		onSceneLoaded += OnSceneLoaded;
+		Application.runInBackground = true;
+		Application.targetFrameRate = -1;
+		QualitySettings.vSyncCount = 0;
 	}
-	
+
 	private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-		UpdateActiveCamera();
+		VirtualScreen.Instance?.ResetComfortAnchor();
+		GameContext.Refresh();
+		ApplyContext(true);
+		VRPlayer.Instance?.RequestHeightCalibration();
 	}
-	
+
 	private void Update() {
-		VRInputManager.UpdateInput();
+		ReleaseDesktopCursor();
+
+		if (!_startupAttempted && Time.frameCount >= 10) {
+			_startupAttempted = true;
+			_vrRendering = new VRRendering();
+			_vrRendering.Start();
+			TrackingOriginMonitor.Initialize();
+			GameContext.Refresh();
+			ApplyContext(true);
+		}
+
+		if (_startupAttempted) {
+			VRInput.UpdateInput();
+			BackgroundUiInputAdapter.Update();
+			CookingInputAdapter.Update();
+		}
 	}
-	
 
 	private void LateUpdate() {
-		_frameCounter++;
+		ReleaseDesktopCursor();
+		if (!_startupAttempted) return;
 
-		if (_frameCounter >= 50) {
-			_frameCounter = 0;
+		CanvasPatch.SynchronizeCaptureCamera();
 
-			UpdateActiveCamera();
+		var player = VRPlayer.Instance;
+		var source = GameContext.SourceCamera;
+
+		var refreshEffects = ++_effectRefreshCounter >= 30;
+		if (refreshEffects) _effectRefreshCounter = 0;
+		if (player) _cameraEffects.Synchronize(source, player, refreshEffects);
+
+		if (++_contextRefreshCounter < 10) return;
+		_contextRefreshCounter = 0;
+
+		GameContext.Refresh();
+		ApplyContext(false);
+		TamagotchiMonitor.Synchronize();
+		PauseUIAdapter.Synchronize();
+		CanvasPatch.ProcessExistingCanvases();
+		CameraEffectMirror.SynchronizeOutlineTargets();
+	}
+
+	private static void ReleaseDesktopCursor() {
+		if (Cursor.lockState != CursorLockMode.None) Cursor.lockState = CursorLockMode.None;
+		if (!Cursor.visible) Cursor.visible = true;
+	}
+
+	private void ApplyContext(bool force) {
+		var source = GameContext.SourceCamera;
+		var overlay = GameContext.OverlayCamera;
+		var changed = force || source != _lastSourceCamera || overlay != _lastOverlayCamera || GameContext.Mode != _lastMode;
+		if (!changed) return;
+
+		_lastSourceCamera = source;
+		_lastOverlayCamera = overlay;
+		_lastMode = GameContext.Mode;
+
+		if (source && _startupAttempted && !VRPlayer.Instance) CreateCameraRig();
+
+		var player = VRPlayer.Instance;
+		if (!player) return;
+
+		player.SetContext(GameContext.Mode, GameContext.PlayerMove, source);
+		if (source) {
+			_cameraEffects.CopyCameraData(source, player.headCamera);
+			_cameraEffects.CopyCameraData(source, player.desktopCamera);
+			_cameraEffects.Synchronize(source, player, true);
+			_effectRefreshCounter = 0;
+			source.stereoTargetEye = StereoTargetEyeMask.None;
+			player.headCamera.enabled = true;
+			player.desktopCamera.enabled = true;
 		}
+		player.SetUiOverlayMode(source && !GameContext.IsPanelMode);
+
+		SetOnlyVRCameras(player);
+		CanvasPatch.ProcessExistingCanvases();
+		TamagotchiMonitor.Synchronize();
 	}
 
-	private void UpdateActiveCamera() {
-		var sceneAndCamera = FindActiveSceneAndCamera();
-
-		var activeCamera = sceneAndCamera.Camera;
-		var activeScene = sceneAndCamera.Scene;
-
-		if (activeCamera) {
-			if (activeScene.name != _lastSceneAndCamera.Scene.name || !_lastSceneAndCamera.Camera || activeCamera != _lastSceneAndCamera.Camera) {
-				Log.LogWarning($"[VRSystem] Scene or camera changed, respawning VR player rig...");
-				_lastSceneAndCamera = sceneAndCamera;
-
-				if (!_vrPlayerCreated) CreateCameraRig(activeCamera);
-
-				var stereoRender = VRPlayer.Instance?.StereoRender;
-
-				if (!stereoRender) return;
-
-				CopyCameraData(activeCamera, stereoRender.headCamera);
-				CopyCameraData(activeCamera, stereoRender.leftMainCamera);
-				CopyCameraData(activeCamera, stereoRender.rightMainCamera);
-
-				// var cameraPersons = activeCamera.transform.Find("CameraPersons")?.GetComponent<Camera>();
-				// if (cameraPersons) {
-				// 	CopyCameraData(cameraPersons, stereoRender.leftPersonsCamera);
-				// 	CopyCameraData(cameraPersons, stereoRender.rightPersonsCamera);
-				// }
-			} else if (VRPlayer.Instance)
-				VRPlayer.Instance.SetSceneAndCamera(sceneAndCamera);
-		} else Log.LogInfo($"[VRSystem] No active camera found in scene: {activeScene.name}");
-	}
-
-	private static SceneAndCamera FindActiveSceneAndCamera() {
-		var result = new SceneAndCamera();
-		var cam = Camera.main;
-
-		if (!cam) {
-			Camera[] cameras = FindObjectsOfType<Camera>(true);
-
-			foreach (var c in cameras) {
-				if (!c.isActiveAndEnabled)
-					continue;
-
-				cam = c;
-
-				break;
-			}
+	private void CreateCameraRig() {
+		for (var index = transform.childCount - 1; index >= 0; index--) {
+			var child = transform.GetChild(index);
+			if (child.name == "[VRPlayer]") Destroy(child.gameObject);
 		}
-
-		// is this fine idk future me check ts out
-		if (!cam) return result;
-
-		result.Camera = cam;
-		result.Scene = cam.gameObject.scene;
-
-		return result;
-	}
-	
-	public void CreateCameraRig(Camera usedCamera) {
-		CleanupExistingRigs();
-
-		if (VRPlayer.Instance)
-			return;
-
-		Log.LogWarning($"[VRSystem] Creating new VRPlayer...");
-		GameObject rig = new GameObject("[VRPlayer]");
+		if (VRPlayer.Instance) return;
+		
+		Log.LogInfo("[VRSystem] Creating VRPlayer.");
+		var rig = new GameObject("[VRPlayer]");
 		rig.transform.SetParent(transform, false);
 		rig.AddComponent<VRPlayer>();
-		_vrPlayerCreated = true;
 	}
-	
-	private void CleanupExistingRigs() {
-		for (var i = transform.childCount - 1; i >= 0; i--) {
-			var child = transform.GetChild(i);
 
-			if (child.name == "[VRCameraRig]") {
-				Destroy(child.gameObject);
-				if (DebugMode) Log.LogWarning($"[VRSystem] Destroying VR Camera Rig {child.name}...");
-			}
-		}
+	private static void SetOnlyVRCameras(VRPlayer player) {
+		foreach (var camera in FindObjectsOfType<Camera>(true)) camera.stereoTargetEye = StereoTargetEyeMask.None;
 
-		_vrPlayerCreated = false;
+		player.headCamera.stereoTargetEye = StereoTargetEyeMask.Both;
+		player.headCamera.enabled = true;
+		if (player.headsetUiCamera) player.headsetUiCamera.stereoTargetEye = StereoTargetEyeMask.Both;
 	}
-	
-	private static void CopyCameraData(Camera source, Camera target) {
-		if (!source || !target)
-			return;
-		
-		target.backgroundColor = source.backgroundColor;
-		target.orthographic = source.orthographic;
-		target.orthographicSize = source.orthographicSize;
-		target.farClipPlane = source.farClipPlane;
-		target.renderingPath = source.renderingPath;
-		target.allowHDR = source.allowHDR;
-		target.allowMSAA = source.allowMSAA;
 
-		var sourcePpLayer = source.GetComponent<PostProcessLayer>();
-
-		if (!sourcePpLayer) {
-			Log.LogWarning($"[VRSystem] No PostProcessLayer found in Camera: {source.name}, Tag: {source.tag}, Scene: {source.scene.name}.");
-			return;
-		}
-
-		var targetPpLayer = target.gameObject.GetOrAddComponent<PostProcessLayer>();
-		targetPpLayer.m_Resources = sourcePpLayer.m_Resources;
-		targetPpLayer.volumeLayer = sourcePpLayer.volumeLayer;
-		targetPpLayer.antialiasingMode = sourcePpLayer.antialiasingMode;
-		targetPpLayer.stopNaNPropagation = sourcePpLayer.stopNaNPropagation;
-		targetPpLayer.finalBlitToCameraTarget = sourcePpLayer.finalBlitToCameraTarget;
-		targetPpLayer.volumeTrigger = target.transform;
-	}
-	
 	private void OnDestroy() {
-		onSceneLoaded -= OnSceneLoaded;
-
+		SceneLoaded -= OnSceneLoaded;
 		if (Instance == this) Instance = null;
+		TamagotchiMonitor.Dispose();
+		BackgroundUiInputAdapter.Reset();
+		VRInput.Shutdown();
+		_vrRendering?.Dispose();
 	}
-
-	// Unused
-	// private void TogglePlayerCam(bool toggle) {
-	// 	if (!VRPlayer.Instance || !VRPlayer.Instance.StereoRender)
-	// 		return;
-	//
-	// 	var mask = toggle ? 0 : StereoRender.DefaultCullingMask;
-	// 	VRPlayer.Instance.StereoRender.leftCamera.cullingMask = mask;
-	// 	VRPlayer.Instance.StereoRender.rightCamera.cullingMask = mask;
-	// }
 }
