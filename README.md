@@ -58,6 +58,7 @@ Known Bugs
 - SpaceCar UI does not spin with the camera
 - Ghost Mita Gluing is offset
 - VRIK bones are not perfect
+- Pumpkin minigame unimplemented
 - Please report more in the [Discord](https://discord.gg/EcGQUTBVda) or in [GitHub Issues](https://github.com/Glitchtest51/MiSide_VR/issues)
 
 Contributions and Donations
