@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Il2CppInterop.Runtime.Attributes;
 using MiSide_VR.Core;
 using UnityEngine;

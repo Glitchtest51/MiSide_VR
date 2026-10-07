@@ -196,18 +196,16 @@ sealed class PlayerBodyIK : IDisposable {
 		_rightGripResolved = rig.rightController.TryGetGripPose(out var rightGrip);
 		var leftHandPosition = _leftGripResolved ? leftGrip.Position + LeftGripFineOffset : LeftFallbackHandTargetOffset;
 		var rightHandPosition = _rightGripResolved ? rightGrip.Position + RightGripFineOffset : RightFallbackHandTargetOffset;
-		var leftHandRotation = GetHandTargetRotation(rig.leftController, true, references.leftHand, out _leftAimResolved);
-		var rightHandRotation = GetHandTargetRotation(rig.rightController, false, references.rightHand, out _rightAimResolved);
+		var leftHandRotation = GetHandTargetRotation(rig.leftController, true, out _leftAimResolved);
+		var rightHandRotation = GetHandTargetRotation(rig.rightController, false, out _rightAimResolved);
 		_leftHandTarget = CreateTarget("[VR Left Hand Target]", rig.leftControllerObject.transform, leftHandPosition, leftHandRotation);
 		_rightHandTarget = CreateTarget("[VR Right Hand Target]", rig.rightControllerObject.transform, rightHandPosition, rightHandRotation);
 		if (DebugMode) Log.LogDebug($"[PlayerBodyIK] SteamVR grip positions: left={leftHandPosition}, right={rightHandPosition}.");
 	}
 
-	private static Quaternion GetHandTargetRotation(VRController controller, bool leftHand, Transform referenceHand, out bool resolved) {
+	private static Quaternion GetHandTargetRotation(VRController controller, bool leftHand, out bool resolved) {
 		resolved = controller.TryGetAimPose(out var aimPose);
-		if (!resolved) return Quaternion.Inverse(controller.transform.rotation) * referenceHand.rotation;
-
-		return GetAimHandRotation(aimPose, leftHand);
+		return GetAimHandRotation(resolved ? aimPose : controller.FallbackAimPose, leftHand);
 	}
 
 	private void RefreshControllerAttachments(VRPlayer rig) {

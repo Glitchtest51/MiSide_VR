@@ -36,6 +36,7 @@ public sealed class Plugin : BasePlugin {
 	private static ConfigEntry<float> _snapTurnAngle;
 	private static ConfigEntry<float> _smoothTurnSpeed;
 	private static ConfigEntry<float> _datamoshStrength;
+	private static ConfigEntry<bool> _skipHeadsetCheck;
 
 	internal static event Action<Scene, LoadSceneMode> SceneLoaded;
 	
@@ -67,6 +68,7 @@ public sealed class Plugin : BasePlugin {
 		_turnStyle = Config.Bind("Turning", "Mode", TurnStyle.Snap, "Snap, Smooth, or Disabled");
 		_snapTurnAngle = Config.Bind("Turning", "SnapAngle", 30f, new ConfigDescription("Degrees rotated for each snap-turn.", new AcceptableValueRange<float>(15f, 90f)));
 		_smoothTurnSpeed = Config.Bind("Turning", "SmoothSpeed", 90f, new ConfigDescription("Maximum smooth-turn speed in degrees/s.", new AcceptableValueRange<float>(30f, 360f)));
+		_skipHeadsetCheck = Config.Bind("Startup", "SkipHeadsetCheck", false, "Skips the VR Runtime check at startup and always enables VR.");
 		_datamoshStrength = Config.Bind("Visuals", "DatamoshStrength", 0.5f, new ConfigDescription("Datamosh Strength. Set to 1 for the original strength.", new AcceptableValueRange<float>(0.1f, 1f)));
 	}
 
@@ -78,18 +80,27 @@ public sealed class Plugin : BasePlugin {
 			return;
 		}
 
-		var steamVRready = false;
-		var error = EVRInitError.None;
-		var initialized = false;
-		try {
-			var system = OpenVR.Init(ref error, EVRApplicationType.VRApplication_Background);
-			initialized = error == EVRInitError.None;
-			steamVRready = initialized && system != null && system.IsTrackedDeviceConnected(OpenVR.k_unTrackedDeviceIndex_Hmd);
-		} catch { steamVRready = false; }
-		finally { if (initialized) OpenVR.Shutdown(); }
-		
-		if (!steamVRready) {
-			Log.LogWarning("No headset detected! VR disabled.");
+		if (!_skipHeadsetCheck.Value) {
+			var error = EVRInitError.None;
+			var initialized = false;
+			try {
+				var system = OpenVR.Init(ref error, EVRApplicationType.VRApplication_Background);
+				initialized = error == EVRInitError.None;
+				if (!initialized) {
+					Log.LogWarning($"OpenVR init failed: {error}. VR disabled. Set SkipHeadsetCheck=true to bypass check.");
+					return;
+				}
+				if (system == null || !system.IsTrackedDeviceConnected(OpenVR.k_unTrackedDeviceIndex_Hmd)) {
+					Log.LogWarning("No headset detected! VR disabled.");
+					return;
+				}
+				return;
+			} catch (Exception exception) {
+				Log.LogWarning($"OpenVR headset check failed: {exception}. VR disabled.");
+				return;
+			} finally { if (initialized) OpenVR.Shutdown(); }
+		} else { 
+			Log.LogWarning("VR runtime check skipped by config.") 
 			return;
 		}
 
